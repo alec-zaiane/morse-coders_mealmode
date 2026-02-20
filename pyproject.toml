@@ -9,4 +9,5 @@ dependencies = [
     "django-stubs-ext>=5.2.9",
     "djangorestframework>=3.16.1",
     "djangorestframework-stubs[compatible-mpypy]>=3.16.8",
+    "drf-spectacular>=0.29.0",
 ]
