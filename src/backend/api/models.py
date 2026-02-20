@@ -34,20 +34,20 @@ class NutritionStats(models.Model):
 
     # per-unit nutrition stats, null means unknown / not provided
     kcal_per_unit = models.FloatField(null=True)
-    fat_saturated_per_unit = models.FloatField(null=True)
-    fat_trans_per_unit = models.FloatField(null=True)
-    carbohydrate_fiber_per_unit = models.FloatField(null=True)
-    carbohydrate_sugar_per_unit = models.FloatField(null=True)
-    protein_per_unit = models.FloatField(null=True)
-    cholesterol_per_unit = models.FloatField(null=True)
-    sodium_per_unit = models.FloatField(null=True)
+    fat_saturated_grams_per_unit = models.FloatField(null=True)
+    fat_trans_grams_per_unit = models.FloatField(null=True)
+    carbohydrate_fiber_grams_per_unit = models.FloatField(null=True)
+    carbohydrate_sugar_grams_per_unit = models.FloatField(null=True)
+    protein_grams_per_unit = models.FloatField(null=True)
+    cholesterol_grams_per_unit = models.FloatField(null=True)
+    sodium_milligrams_per_unit = models.FloatField(null=True)
 
-    potassium_per_unit = models.FloatField(null=True)
-    calcium_per_unit = models.FloatField(null=True)
-    iron_per_unit = models.FloatField(null=True)
-    vitamin_a_per_unit = models.FloatField(null=True)
-    vitamin_c_per_unit = models.FloatField(null=True)
-    vitamin_d_per_unit = models.FloatField(null=True)
+    potassium_milligrams_per_unit = models.FloatField(null=True)
+    calcium_milligrams_per_unit = models.FloatField(null=True)
+    iron_milligrams_per_unit = models.FloatField(null=True)
+    vitamin_a_milligrams_per_unit = models.FloatField(null=True)
+    vitamin_c_milligrams_per_unit = models.FloatField(null=True)
+    vitamin_d_milligrams_per_unit = models.FloatField(null=True)
 
     # more can be added here later
 
