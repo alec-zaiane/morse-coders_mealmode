@@ -86,8 +86,9 @@ class NutritionStats(models.Model):
             for field in self._meta.fields
             if field.name not in ("id", "ingredient", "base_unit", "kcal_per_unit")
             and getattr(self, field.name) is not None
+            and getattr(self, field.name) != 0
         )
-        return f"{self.kcal_per_unit} kcal per {self.base_unit} {f'+{n} other nonzero nutrients' if n > 0 else ''}"
+        return f"{self.kcal_per_unit:.2f} kcal per {self.base_unit} {f'+{n} other nonzero nutrients' if n > 0 else ''}"
 
 
 class Ingredient(models.Model):
