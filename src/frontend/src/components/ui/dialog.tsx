@@ -64,7 +64,7 @@ export function DialogContent({
       />
       <div
         role="dialog"
-        className={`fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border border-gray-200 bg-white p-6 shadow-lg ${className}`}
+        className={`fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border border-palette-mist bg-white p-6 shadow-lg ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

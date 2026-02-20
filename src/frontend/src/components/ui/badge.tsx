@@ -6,9 +6,9 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 export function Badge({ className = '', variant = 'secondary', ...props }: BadgeProps) {
   const variants = {
-    default: 'bg-orange-500 text-white',
-    secondary: 'bg-gray-100 text-gray-800',
-    outline: 'border border-gray-300 bg-transparent',
+    default: 'bg-palette-terracotta text-white',
+    secondary: 'bg-palette-cream text-palette-taupe',
+    outline: 'border border-palette-taupe bg-transparent',
   };
   return (
     <span

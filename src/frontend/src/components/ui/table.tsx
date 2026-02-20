@@ -13,13 +13,13 @@ export function TableBody({ ...props }: HTMLAttributes<HTMLTableSectionElement>)
 }
 
 export function TableRow({ className = '', ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={`border-b border-gray-200 transition-colors hover:bg-gray-50/50 ${className}`} {...props} />;
+  return <tr className={`border-b border-palette-mist transition-colors hover:bg-palette-mist/50 ${className}`} {...props} />;
 }
 
 export function TableHead({ className = '', ...props }: HTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
-      className={`h-10 px-4 text-left align-middle font-medium text-gray-600 ${className}`}
+      className={`h-10 px-4 text-left align-middle font-medium text-palette-slate ${className}`}
       {...props}
     />
   );

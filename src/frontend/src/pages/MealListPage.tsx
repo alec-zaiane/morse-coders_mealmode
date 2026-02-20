@@ -47,13 +47,13 @@ export function MealListPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Meals</h2>
-        <p className="text-gray-600">Browse and search your meal collection</p>
+        <h2 className="text-2xl font-semibold text-palette-taupe mb-2">Meals</h2>
+        <p className="text-palette-slate">Browse and search your meal collection</p>
       </div>
 
       <div className="mb-6 space-y-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-palette-slate" />
           <Input
             type="text"
             placeholder="Search meals..."
@@ -65,7 +65,7 @@ export function MealListPage() {
 
         <div className="flex flex-wrap gap-3 items-center">
           <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-gray-500" />
+            <DollarSign className="w-4 h-4 text-palette-slate" />
             <Input
               type="number"
               placeholder="Max cost/serving"
@@ -76,7 +76,7 @@ export function MealListPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-gray-500" />
+            <Flame className="w-4 h-4 text-palette-slate" />
             <Input
               type="number"
               placeholder="Max calories"
@@ -106,7 +106,7 @@ export function MealListPage() {
         </div>
       </div>
 
-      <div className="mb-4 text-sm text-gray-600">
+      <div className="mb-4 text-sm text-palette-slate">
         Showing {filteredMeals.length} of {meals.length} meals
       </div>
 
@@ -126,24 +126,24 @@ export function MealListPage() {
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center gap-1 text-green-700">
+                    <div className="flex items-center gap-1 text-palette-slate">
                       <DollarSign className="w-4 h-4" />
-                      <span>${costPerServing.toFixed(2)}/serving</span>
+                      <span>{costPerServing.toFixed(2)}/serving</span>
                     </div>
-                    <div className="flex items-center gap-1 text-orange-700">
+                    <div className="flex items-center gap-1 text-palette-terracotta">
                       <Flame className="w-4 h-4" />
                       <span>{Math.round(nutrition.perServing.calories)} cal</span>
                     </div>
                   </div>
-                  <div className="text-sm text-gray-600">{meal.servings} servings</div>
+                  <div className="text-sm text-palette-slate">{meal.servings} servings</div>
                   <div className="flex flex-wrap gap-1">
                     {meal.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
+                      <Badge key={tag} variant="palette-taupe" className="text-xs">
                         {tag}
                       </Badge>
                     ))}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-palette-taupe">
                     Prep: {meal.prepTime}m • Cook: {meal.cookTime}m
                   </div>
                 </div>
@@ -154,7 +154,7 @@ export function MealListPage() {
       </div>
 
       {filteredMeals.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-palette-taupe">
           No meals found matching your criteria
         </div>
       )}
