@@ -33,21 +33,49 @@ class NutritionStats(models.Model):
     )
 
     # per-unit nutrition stats, null means unknown / not provided
-    kcal_per_unit = models.FloatField(null=True)
-    fat_saturated_grams_per_unit = models.FloatField(null=True)
-    fat_trans_grams_per_unit = models.FloatField(null=True)
-    carbohydrate_fiber_grams_per_unit = models.FloatField(null=True)
-    carbohydrate_sugar_grams_per_unit = models.FloatField(null=True)
-    protein_grams_per_unit = models.FloatField(null=True)
-    cholesterol_grams_per_unit = models.FloatField(null=True)
-    sodium_milligrams_per_unit = models.FloatField(null=True)
+    kcal_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Calories (Kcal) per base unit")
+    )
+    fat_saturated_grams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Saturated fat (g) per base unit")
+    )
+    fat_trans_grams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Trans fat (g) per base unit")
+    )
+    carbohydrate_fiber_grams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Fiber (g) per base unit")
+    )
+    carbohydrate_sugar_grams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Sugars (g) per base unit")
+    )
+    protein_grams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Protein (g) per base unit")
+    )
+    cholesterol_milligrams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Cholesterol (mg) per base unit")
+    )
+    sodium_milligrams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Sodium (mg) per base unit")
+    )
 
-    potassium_milligrams_per_unit = models.FloatField(null=True)
-    calcium_milligrams_per_unit = models.FloatField(null=True)
-    iron_milligrams_per_unit = models.FloatField(null=True)
-    vitamin_a_milligrams_per_unit = models.FloatField(null=True)
-    vitamin_c_milligrams_per_unit = models.FloatField(null=True)
-    vitamin_d_milligrams_per_unit = models.FloatField(null=True)
+    potassium_milligrams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Potassium (mg) per base unit")
+    )
+    calcium_milligrams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Calcium (mg) per base unit")
+    )
+    iron_milligrams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Iron (mg) per base unit")
+    )
+    vitamin_a_milligrams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Vitamin A (mg) per base unit")
+    )
+    vitamin_c_milligrams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Vitamin C (mg) per base unit")
+    )
+    vitamin_d_milligrams_per_unit = models.FloatField(
+        null=True, blank=True, help_text=_("Vitamin D (mg) per base unit")
+    )
 
     # more can be added here later
 
