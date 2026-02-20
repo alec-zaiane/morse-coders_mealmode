@@ -9,6 +9,51 @@ class NutritionStatsInline(admin.StackedInline[models.NutritionStats]):
     model = models.NutritionStats
     extra = 1
     max_num = 1
+    fieldsets = (
+        (
+            "Base",
+            {
+                "fields": (
+                    "base_unit",
+                    "kcal_per_unit",
+                )
+            },
+        ),
+        (
+            "Macronutrients",
+            {
+                "fields": (
+                    "fat_saturated_grams_per_unit",
+                    "fat_trans_grams_per_unit",
+                    "carbohydrate_fiber_grams_per_unit",
+                    "carbohydrate_sugar_grams_per_unit",
+                    "protein_grams_per_unit",
+                ),
+            },
+        ),
+        (
+            "Minerals & Electrolytes",
+            {
+                "fields": (
+                    "cholesterol_milligrams_per_unit",
+                    "sodium_milligrams_per_unit",
+                    "potassium_milligrams_per_unit",
+                    "calcium_milligrams_per_unit",
+                    "iron_milligrams_per_unit",
+                ),
+            },
+        ),
+        (
+            "Vitamins",
+            {
+                "fields": (
+                    "vitamin_a_milligrams_per_unit",
+                    "vitamin_c_milligrams_per_unit",
+                    "vitamin_d_milligrams_per_unit",
+                ),
+            },
+        ),
+    )
 
 
 @register(models.Ingredient)

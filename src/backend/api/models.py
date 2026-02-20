@@ -57,7 +57,6 @@ class NutritionStats(models.Model):
     sodium_milligrams_per_unit = models.FloatField(
         null=True, blank=True, help_text=_("Sodium (mg) per base unit")
     )
-
     potassium_milligrams_per_unit = models.FloatField(
         null=True, blank=True, help_text=_("Potassium (mg) per base unit")
     )
@@ -80,7 +79,13 @@ class NutritionStats(models.Model):
     # more can be added here later
 
     def inline_str(self) -> str:
-        return f"{self.kcal_per_unit} kcal per {self.base_unit}"
+        n = sum(
+            1
+            for field in self._meta.fields
+            if field.name not in ("id", "ingredient", "base_unit", "kcal_per_unit")
+            and getattr(self, field.name) is not None
+        )
+        return f"{self.kcal_per_unit} kcal per {self.base_unit} ({n} other nonzero nutrients)"
 
 
 class Ingredient(models.Model):
