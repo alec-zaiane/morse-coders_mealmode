@@ -1,4 +1,5 @@
 import type { Meal, Ingredient } from '../types';
+import type { NutritionStats } from '../api/mealmodeAPI';
 
 export function getIngredientById(ingredients: Ingredient[], id: string): Ingredient | undefined {
   return ingredients.find((i) => i.id === id);

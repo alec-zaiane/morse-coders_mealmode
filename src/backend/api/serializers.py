@@ -21,7 +21,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer[models.RecipeIngred
 
     class Meta:  # type: ignore
         model = models.RecipeIngredient
-        fields = ("id", "ingredient", "quantity", "unit")
+        fields = ("id", "ingredient", "quantity")
 
 
 class RecipeSerializer(serializers.ModelSerializer[models.Recipe]):
@@ -29,4 +29,4 @@ class RecipeSerializer(serializers.ModelSerializer[models.Recipe]):
 
     class Meta:  # type: ignore
         model = models.Recipe
-        fields = ("id", "name", "ingredients_list")
+        fields = "__all__"

@@ -7,6 +7,8 @@ import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
+import { RecipeCard } from '../components/recipecard';
+import { useRecipesList } from '../api/mealmodeAPI';
 
 export function MealListPage() {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ export function MealListPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [maxCost, setMaxCost] = useState<number | null>(null);
   const [maxCalories, setMaxCalories] = useState<number | null>(null);
+  const { data: recipeData, isError, isLoading } = useRecipesList();
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -110,48 +113,14 @@ export function MealListPage() {
         Showing {filteredMeals.length} of {meals.length} meals
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredMeals.map((meal) => {
-          const costPerServing = calculateCostPerServing(meal, ingredients);
-          const nutrition = calculateMealNutrition(meal, ingredients);
-          return (
-            <Card
-              key={meal.id}
-              className="hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => navigate(`/meal/${meal.id}`)}
-            >
-              <CardHeader>
-                <CardTitle className="text-lg">{meal.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center gap-1 text-palette-slate">
-                      <DollarSign className="w-4 h-4" />
-                      <span>{costPerServing.toFixed(2)}/serving</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-palette-terracotta">
-                      <Flame className="w-4 h-4" />
-                      <span>{Math.round(nutrition.perServing.calories)} cal</span>
-                    </div>
-                  </div>
-                  <div className="text-sm text-palette-slate">{meal.servings} servings</div>
-                  <div className="flex flex-wrap gap-1">
-                    {meal.tags.map((tag) => (
-                      <Badge key={tag} variant="palette-taupe" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="text-xs text-palette-taupe">
-                    Prep: {meal.prepTime}m • Cook: {meal.cookTime}m
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      {!isLoading && recipeData && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {
+            recipeData.data.results.map((recipe) => { return (<RecipeCard recipe={recipe} key={recipe.id} />) })
+          }
+        </div>
+
+      )}
 
       {filteredMeals.length === 0 && (
         <div className="text-center py-12 text-palette-taupe">

@@ -136,6 +136,9 @@ class RecipeIngredient(models.Model):
 class Recipe(models.Model):
     name: models.CharField[str, str] = models.CharField(max_length=100)
     ingredients = models.ManyToManyField(Ingredient, through=RecipeIngredient)
+    servings: models.IntegerField[int, int] = models.IntegerField(
+        default=1, help_text=_("Number of servings this recipe makes")
+    )
 
     if TYPE_CHECKING:
         from django_stubs_ext.db.models.manager import RelatedManager

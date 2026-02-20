@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, NavLink, Outlet } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { MealListPage } from './pages/MealListPage';
-import { MealDetailPage } from './pages/MealDetailPage';
-import { IngredientPage } from './pages/IngredientPage';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+// import { MealDetailPage } from './pages/MealDetailPage';
+// import { IngredientPage } from './pages/IngredientPage';
 import { UtensilsCrossed } from 'lucide-react';
 
 function Layout() {
@@ -30,18 +31,22 @@ function Layout() {
   );
 }
 
+const queryClient = new QueryClient();
+
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppProvider>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route index element={<MealListPage />} />
-            <Route path="meal/:id" element={<MealDetailPage />} />
-            <Route path="ingredient/:id" element={<IngredientPage />} />
-          </Route>
-        </Routes>
-      </AppProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppProvider>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route index element={<MealListPage />} />
+              {/* <Route path="meal/:id" element={<MealDetailPage />} />
+            <Route path="ingredient/:id" element={<IngredientPage />} /> */}
+            </Route>
+          </Routes>
+        </AppProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

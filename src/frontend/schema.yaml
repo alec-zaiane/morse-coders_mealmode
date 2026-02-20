@@ -1,0 +1,593 @@
+openapi: 3.0.3
+info:
+  title: Mealmode API
+  version: 1.0.0
+paths:
+  /api/ingredients/:
+    get:
+      operationId: ingredients_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - ingredients
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedIngredientList'
+          description: ''
+    post:
+      operationId: ingredients_create
+      tags:
+      - ingredients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+          description: ''
+  /api/ingredients/{id}/:
+    get:
+      operationId: ingredients_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ingredient.
+        required: true
+      tags:
+      - ingredients
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+          description: ''
+    put:
+      operationId: ingredients_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ingredient.
+        required: true
+      tags:
+      - ingredients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+          description: ''
+    patch:
+      operationId: ingredients_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ingredient.
+        required: true
+      tags:
+      - ingredients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIngredient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIngredient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIngredient'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+          description: ''
+    delete:
+      operationId: ingredients_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ingredient.
+        required: true
+      tags:
+      - ingredients
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/recipes/:
+    get:
+      operationId: recipes_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - recipes
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRecipeList'
+          description: ''
+    post:
+      operationId: recipes_create
+      tags:
+      - recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recipe'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Recipe'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Recipe'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipe'
+          description: ''
+  /api/recipes/{id}/:
+    get:
+      operationId: recipes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recipe.
+        required: true
+      tags:
+      - recipes
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipe'
+          description: ''
+    put:
+      operationId: recipes_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recipe.
+        required: true
+      tags:
+      - recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recipe'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Recipe'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Recipe'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipe'
+          description: ''
+    patch:
+      operationId: recipes_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recipe.
+        required: true
+      tags:
+      - recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRecipe'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRecipe'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRecipe'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipe'
+          description: ''
+    delete:
+      operationId: recipes_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recipe.
+        required: true
+      tags:
+      - recipes
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    BaseUnitEnum:
+      enum:
+      - kg
+      - L
+      - pc
+      type: string
+      description: |-
+        * `kg` - Kilogram
+        * `L` - Liter
+        * `pc` - Piece / Count
+    Ingredient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        nutrition_stats:
+          allOf:
+          - $ref: '#/components/schemas/NutritionStats'
+          readOnly: true
+      required:
+      - id
+      - name
+      - nutrition_stats
+    NutritionStats:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        base_unit:
+          allOf:
+          - $ref: '#/components/schemas/BaseUnitEnum'
+          description: |-
+            The base unit for the nutrition stats (e.g., per kg, per liter, etc.)
+
+            * `kg` - Kilogram
+            * `L` - Liter
+            * `pc` - Piece / Count
+        kcal_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Calories (Kcal) per base unit
+        fat_saturated_grams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Saturated fat (g) per base unit
+        fat_trans_grams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Trans fat (g) per base unit
+        carbohydrate_fiber_grams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Fiber (g) per base unit
+        carbohydrate_sugar_grams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Sugars (g) per base unit
+        protein_grams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Protein (g) per base unit
+        cholesterol_milligrams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Cholesterol (mg) per base unit
+        sodium_milligrams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Sodium (mg) per base unit
+        potassium_milligrams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Potassium (mg) per base unit
+        calcium_milligrams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Calcium (mg) per base unit
+        iron_milligrams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Iron (mg) per base unit
+        vitamin_a_milligrams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Vitamin A (mg) per base unit
+        vitamin_c_milligrams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Vitamin C (mg) per base unit
+        vitamin_d_milligrams_per_unit:
+          type: number
+          format: double
+          nullable: true
+          description: Vitamin D (mg) per base unit
+        ingredient:
+          type: integer
+          nullable: true
+      required:
+      - id
+    PaginatedIngredientList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+    PaginatedRecipeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recipe'
+    PatchedIngredient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        nutrition_stats:
+          allOf:
+          - $ref: '#/components/schemas/NutritionStats'
+          readOnly: true
+    PatchedRecipe:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ingredients_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeIngredient'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        servings:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Number of servings this recipe makes
+        ingredients:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+    Recipe:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ingredients_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeIngredient'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        servings:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Number of servings this recipe makes
+        ingredients:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+      required:
+      - id
+      - ingredients
+      - ingredients_list
+      - name
+    RecipeIngredient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ingredient:
+          allOf:
+          - $ref: '#/components/schemas/Ingredient'
+          readOnly: true
+        quantity:
+          type: number
+          format: double
+          description: Quantity in base units (e.g., grams, liters, pieces), defined
+            by the ingredient's nutrition stats)
+      required:
+      - id
+      - ingredient
+      - quantity
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
