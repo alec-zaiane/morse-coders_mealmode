@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 class IngredientUnit(models.TextChoices):
     KILOGRAM = "kg", _("Kilogram")
-    LITER = "l", _("Liter")
+    LITER = "L", _("Liter")
     PIECE = "pc", _("Piece / Count")
     # more can be added here later
 
@@ -85,7 +85,7 @@ class NutritionStats(models.Model):
             if field.name not in ("id", "ingredient", "base_unit", "kcal_per_unit")
             and getattr(self, field.name) is not None
         )
-        return f"{self.kcal_per_unit} kcal per {self.base_unit} ({n} other nonzero nutrients)"
+        return f"{self.kcal_per_unit} kcal per {self.base_unit} {f'+{n} other nonzero nutrients' if n > 0 else ''}"
 
 
 class Ingredient(models.Model):

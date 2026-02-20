@@ -58,8 +58,15 @@ class NutritionStatsInline(admin.StackedInline[models.NutritionStats]):
 
 @register(models.Ingredient)
 class IngredientAdmin(admin.ModelAdmin[models.Ingredient]):
-    list_display = ("name",)
+    list_display = ("name", "nutrition_stats_inline")
     inlines = [NutritionStatsInline]
+
+    @admin.display(description="Nutrition Stats")
+    def nutrition_stats_inline(self, obj: models.Ingredient) -> str:
+        if hasattr(obj, "nutrition_stats"):
+            return obj.nutrition_stats.inline_str()
+        else:
+            return "No nutrition stats"
 
 
 class RecipeIngredientInline(admin.TabularInline[models.RecipeIngredient]):
@@ -74,4 +81,4 @@ class RecipeAdmin(admin.ModelAdmin[models.Recipe]):
 
     @admin.display(description="Ingredients")
     def ingredients_list(self, obj: models.Recipe) -> str:
-        return ", ".join(str(ri) for ri in obj.ingredients)
+        return ", ".join(str(ri) for ri in obj.ingredients_list.all())
