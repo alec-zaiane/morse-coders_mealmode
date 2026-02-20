@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
+
+NullableFloatField = models.FloatField[Optional[float], Optional[float]]
 
 
 class IngredientUnit(models.TextChoices):
@@ -16,14 +18,14 @@ class NutritionStats(models.Model):
     Nutrition stats for an ingredient per one base unit (like x calories per 100g).
     """
 
-    ingredient = models.OneToOneField(
+    ingredient: models.OneToOneField["Ingredient", "Ingredient"] = models.OneToOneField(
         "Ingredient",
         on_delete=models.CASCADE,
         related_name="nutrition_stats",
         null=True,
         blank=True,
     )
-    base_unit = models.CharField(
+    base_unit: models.CharField[IngredientUnit, IngredientUnit] = models.CharField(
         max_length=4,
         choices=IngredientUnit.choices,
         default=IngredientUnit.KILOGRAM,
@@ -33,46 +35,46 @@ class NutritionStats(models.Model):
     )
 
     # per-unit nutrition stats, null means unknown / not provided
-    kcal_per_unit = models.FloatField(
+    kcal_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Calories (Kcal) per base unit")
     )
-    fat_saturated_grams_per_unit = models.FloatField(
+    fat_saturated_grams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Saturated fat (g) per base unit")
     )
-    fat_trans_grams_per_unit = models.FloatField(
+    fat_trans_grams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Trans fat (g) per base unit")
     )
-    carbohydrate_fiber_grams_per_unit = models.FloatField(
+    carbohydrate_fiber_grams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Fiber (g) per base unit")
     )
-    carbohydrate_sugar_grams_per_unit = models.FloatField(
+    carbohydrate_sugar_grams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Sugars (g) per base unit")
     )
-    protein_grams_per_unit = models.FloatField(
+    protein_grams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Protein (g) per base unit")
     )
-    cholesterol_milligrams_per_unit = models.FloatField(
+    cholesterol_milligrams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Cholesterol (mg) per base unit")
     )
-    sodium_milligrams_per_unit = models.FloatField(
+    sodium_milligrams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Sodium (mg) per base unit")
     )
-    potassium_milligrams_per_unit = models.FloatField(
+    potassium_milligrams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Potassium (mg) per base unit")
     )
-    calcium_milligrams_per_unit = models.FloatField(
+    calcium_milligrams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Calcium (mg) per base unit")
     )
-    iron_milligrams_per_unit = models.FloatField(
+    iron_milligrams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Iron (mg) per base unit")
     )
-    vitamin_a_milligrams_per_unit = models.FloatField(
+    vitamin_a_milligrams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Vitamin A (mg) per base unit")
     )
-    vitamin_c_milligrams_per_unit = models.FloatField(
+    vitamin_c_milligrams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Vitamin C (mg) per base unit")
     )
-    vitamin_d_milligrams_per_unit = models.FloatField(
+    vitamin_d_milligrams_per_unit: NullableFloatField = models.FloatField(
         null=True, blank=True, help_text=_("Vitamin D (mg) per base unit")
     )
 
@@ -89,7 +91,7 @@ class NutritionStats(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=100)
+    name: models.CharField[str, str] = models.CharField(max_length=100)
 
     if TYPE_CHECKING:
         nutrition_stats: "models.OneToOneField[NutritionStats]"
@@ -104,22 +106,22 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         related_name="ingredients_list",
     )
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.FloatField()  # quantity in below units
-    unit = models.CharField(
-        max_length=4,
-        choices=IngredientUnit.choices,
-        default=IngredientUnit.KILOGRAM,
-        help_text=_(
-            "The unit multiplier for the ingredient quantity (e.g., kg, liter, piece, etc.)"
-        ),
+    ingredient: models.ForeignKey[Ingredient] = models.ForeignKey(
+        Ingredient, on_delete=models.CASCADE
     )
-    notes = models.TextField(blank=True)  # optional notes about the ingredient
+    quantity: models.FloatField[float, float] = models.FloatField(
+        help_text=_(
+            "Quantity in base units (e.g., grams, liters, pieces), defined by the ingredient's nutrition stats)"
+        )
+    )  # quantity in base units
+    notes: models.TextField[Optional[str], Optional[str]] = models.TextField(
+        blank=True
+    )  # optional notes about the ingredient
 
     def __str__(self) -> str:
-        match self.unit:
+        match self.ingredient.nutrition_stats.base_unit:
             case IngredientUnit.KILOGRAM:
-                return f"{self.quantity / 1000}g of {self.ingredient.name}"
+                return f"{self.quantity * 1000}g of {self.ingredient.name}"
             case IngredientUnit.LITER:
                 return f"{self.quantity}l of {self.ingredient.name}"
             case IngredientUnit.PIECE:
@@ -131,10 +133,10 @@ class RecipeIngredient(models.Model):
 
 
 class Recipe(models.Model):
-    name = models.CharField(max_length=100)
+    name: models.CharField[str, str] = models.CharField(max_length=100)
     ingredients = models.ManyToManyField(Ingredient, through=RecipeIngredient)
 
     if TYPE_CHECKING:
-        from django.db.models.manager import RelatedManager
+        from django_stubs_ext.db.models.manager import RelatedManager
 
         ingredients_list: "RelatedManager[RecipeIngredient]"

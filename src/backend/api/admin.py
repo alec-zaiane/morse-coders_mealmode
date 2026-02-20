@@ -5,7 +5,9 @@ from . import models
 # Register your models here.
 
 
-class NutritionStatsInline(admin.StackedInline[models.NutritionStats]):
+class NutritionStatsInline(
+    admin.StackedInline[models.NutritionStats, models.NutritionStats]
+):
     model = models.NutritionStats
     extra = 1
     max_num = 1
@@ -59,7 +61,7 @@ class NutritionStatsInline(admin.StackedInline[models.NutritionStats]):
 @register(models.Ingredient)
 class IngredientAdmin(admin.ModelAdmin[models.Ingredient]):
     list_display = ("name", "nutrition_stats_inline")
-    inlines = [NutritionStatsInline]
+    inlines = [NutritionStatsInline]  # type: ignore
 
     @admin.display(description="Nutrition Stats")
     def nutrition_stats_inline(self, obj: models.Ingredient) -> str:
@@ -69,7 +71,9 @@ class IngredientAdmin(admin.ModelAdmin[models.Ingredient]):
             return "No nutrition stats"
 
 
-class RecipeIngredientInline(admin.TabularInline[models.RecipeIngredient]):
+class RecipeIngredientInline(
+    admin.TabularInline[models.RecipeIngredient, models.RecipeIngredient]
+):
     model = models.RecipeIngredient
     extra = 1
 
@@ -77,7 +81,7 @@ class RecipeIngredientInline(admin.TabularInline[models.RecipeIngredient]):
 @register(models.Recipe)
 class RecipeAdmin(admin.ModelAdmin[models.Recipe]):
     list_display = ("name", "ingredients_list")
-    inlines = [RecipeIngredientInline]
+    inlines = [RecipeIngredientInline]  # type: ignore
 
     @admin.display(description="Ingredients")
     def ingredients_list(self, obj: models.Recipe) -> str:
