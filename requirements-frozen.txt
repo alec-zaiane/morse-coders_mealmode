@@ -1,4 +1,6 @@
 asgiref==3.11.1
 django==6.0.2
+django-stubs-ext==5.2.9
 djangorestframework==3.16.1
 sqlparse==0.5.5
+typing-extensions==4.15.0
