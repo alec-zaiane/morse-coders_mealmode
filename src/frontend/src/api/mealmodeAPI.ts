@@ -213,7 +213,7 @@ export const ingredientsList = <TData = AxiosResponse<PaginatedIngredientList>>(
     params?: IngredientsListParams, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.get(
-      `/api/ingredients/`,{
+      `https://localhost:8000/api/ingredients/`,{
     ...options,
         params: {...params, ...options?.params},}
     );
@@ -223,7 +223,7 @@ export const ingredientsCreate = <TData = AxiosResponse<Ingredient>>(
     ingredient: NonReadonly<Ingredient>, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.post(
-      `/api/ingredients/`,
+      `https://localhost:8000/api/ingredients/`,
       ingredient,options
     );
   }
@@ -232,7 +232,7 @@ export const ingredientsRetrieve = <TData = AxiosResponse<Ingredient>>(
     id: number, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.get(
-      `/api/ingredients/${id}/`,options
+      `https://localhost:8000/api/ingredients/${id}/`,options
     );
   }
 
@@ -241,7 +241,7 @@ export const ingredientsUpdate = <TData = AxiosResponse<Ingredient>>(
     ingredient: NonReadonly<Ingredient>, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.put(
-      `/api/ingredients/${id}/`,
+      `https://localhost:8000/api/ingredients/${id}/`,
       ingredient,options
     );
   }
@@ -251,7 +251,7 @@ export const ingredientsPartialUpdate = <TData = AxiosResponse<Ingredient>>(
     patchedIngredient: NonReadonly<PatchedIngredient>, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.patch(
-      `/api/ingredients/${id}/`,
+      `https://localhost:8000/api/ingredients/${id}/`,
       patchedIngredient,options
     );
   }
@@ -260,7 +260,7 @@ export const ingredientsDestroy = <TData = AxiosResponse<void>>(
     id: number, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.delete(
-      `/api/ingredients/${id}/`,options
+      `https://localhost:8000/api/ingredients/${id}/`,options
     );
   }
 
@@ -268,7 +268,7 @@ export const recipesList = <TData = AxiosResponse<PaginatedRecipeList>>(
     params?: RecipesListParams, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.get(
-      `/api/recipes/`,{
+      `https://localhost:8000/api/recipes/`,{
     ...options,
         params: {...params, ...options?.params},}
     );
@@ -278,7 +278,7 @@ export const recipesCreate = <TData = AxiosResponse<Recipe>>(
     recipe: NonReadonly<Recipe>, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.post(
-      `/api/recipes/`,
+      `https://localhost:8000/api/recipes/`,
       recipe,options
     );
   }
@@ -287,7 +287,7 @@ export const recipesRetrieve = <TData = AxiosResponse<Recipe>>(
     id: number, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.get(
-      `/api/recipes/${id}/`,options
+      `https://localhost:8000/api/recipes/${id}/`,options
     );
   }
 
@@ -296,7 +296,7 @@ export const recipesUpdate = <TData = AxiosResponse<Recipe>>(
     recipe: NonReadonly<Recipe>, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.put(
-      `/api/recipes/${id}/`,
+      `https://localhost:8000/api/recipes/${id}/`,
       recipe,options
     );
   }
@@ -306,7 +306,7 @@ export const recipesPartialUpdate = <TData = AxiosResponse<Recipe>>(
     patchedRecipe: NonReadonly<PatchedRecipe>, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.patch(
-      `/api/recipes/${id}/`,
+      `https://localhost:8000/api/recipes/${id}/`,
       patchedRecipe,options
     );
   }
@@ -315,7 +315,7 @@ export const recipesDestroy = <TData = AxiosResponse<void>>(
     id: number, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.delete(
-      `/api/recipes/${id}/`,options
+      `https://localhost:8000/api/recipes/${id}/`,options
     );
   }
 
