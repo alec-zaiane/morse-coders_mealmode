@@ -13,6 +13,23 @@ class IngredientUnit(models.TextChoices):
     # more can be added here later
 
 
+class DayOfWeek(models.TextChoices):
+    MONDAY = "monday", _("Monday")
+    TUESDAY = "tuesday", _("Tuesday")
+    WEDNESDAY = "wednesday", _("Wednesday")
+    THURSDAY = "thursday", _("Thursday")
+    FRIDAY = "friday", _("Friday")
+    SATURDAY = "saturday", _("Saturday")
+    SUNDAY = "sunday", _("Sunday")
+
+
+class MealSlot(models.TextChoices):
+    BREAKFAST = "breakfast", _("Breakfast")
+    LUNCH = "lunch", _("Lunch")
+    DINNER = "dinner", _("Dinner")
+    SNACK = "snack", _("Snack")
+
+
 class NutritionStats(models.Model):
     """
     Nutrition stats for an ingredient per one base unit (like x calories per 100g).
@@ -195,13 +212,15 @@ class MealPlanEntry(models.Model):
         on_delete=models.CASCADE,
         related_name="meal_plan_entries",
     )
-    day: models.CharField[str, str] = models.CharField(
+    day: models.CharField[DayOfWeek, DayOfWeek] = models.CharField(
         max_length=20,
-        help_text=_("Day of the week, e.g. monday, tuesday"),
+        choices=DayOfWeek.choices,
+        help_text=_("Day of the week"),
     )
-    slot: models.CharField[str, str] = models.CharField(
+    slot: models.CharField[MealSlot, MealSlot] = models.CharField(
         max_length=20,
-        help_text=_("Meal slot, e.g. breakfast, lunch, dinner"),
+        choices=MealSlot.choices,
+        help_text=_("Meal slot (e.g. breakfast, lunch, dinner)"),
     )
     servings: models.IntegerField[int, int] = models.IntegerField(default=1)
 

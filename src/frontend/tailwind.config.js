@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        brand: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+      },
       colors: {
         palette: {
           slate: '#632024',
