@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from . import models, serializers
 
@@ -9,6 +10,10 @@ class IngredientViewSet(viewsets.ModelViewSet[models.Ingredient]):
     serializer_class = serializers.IngredientSerializer
     filter_backends = [SearchFilter]
     search_fields = ["name"]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = {
+        "on_hand": ["isnull"],
+    }
 
 
 class RecipeViewSet(viewsets.ModelViewSet[models.Recipe]):

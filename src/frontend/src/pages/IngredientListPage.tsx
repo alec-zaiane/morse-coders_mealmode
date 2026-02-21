@@ -5,14 +5,14 @@ import { IngredientCard } from "../components/ingredientCard";
 import { Refrigerator } from "lucide-react";
 import { Button } from "../components/ui/button";
 
-// TODO put on-hand filter in the backend search
 export function IngredientListPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [showNIngredients, setShowNIngredients] = useState(50);
     const [onHandOnly, setOnHandOnly] = useState(false);
     const { data: ingredients, isLoading, error } = useIngredientsList({
         limit: 100,
-        ...(searchTerm.trim() && { search: searchTerm.trim() })
+        ...(searchTerm.trim() && { search: searchTerm.trim() }),
+        ...(onHandOnly && { on_hand__isnull: false }),
     });
 
 
