@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "api",
     "ingredient_store",
+    "scraper",
     "drf_spectacular",
     "corsheaders",
 ]
