@@ -30,7 +30,7 @@ function Layout() {
                 to="/"
                 end
                 className={({ isActive }) =>
-                  `flex items-center gap-2 text-sm font-medium ${isActive ? 'text-palette-terracotta' : 'text-palette-slate hover:text-palette-mist'}`
+                  `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${isActive ? 'bg-palette-cream/20 text-palette-terracotta' : 'text-palette-slate hover:bg-palette-cream/10 hover:text-palette-mist'}`
                 }
               >
                 <UtensilsCrossed className="w-5 h-5" />
@@ -39,7 +39,7 @@ function Layout() {
               <NavLink
                 to="/plan"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 text-sm font-medium ${isActive ? 'text-palette-terracotta' : 'text-palette-slate hover:text-palette-taupe'}`
+                  `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${isActive ? 'bg-palette-cream/20 text-palette-terracotta' : 'text-palette-slate hover:bg-palette-cream/10 hover:text-palette-mist'}`
                 }
               >
                 <Calendar className="w-5 h-5" />
@@ -48,7 +48,7 @@ function Layout() {
               <NavLink
                 to="/ingredients"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 text-sm font-medium ${isActive ? 'text-palette-terracotta' : 'text-palette-slate hover:text-palette-taupe'}`
+                  `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${isActive ? 'bg-palette-cream/20 text-palette-terracotta' : 'text-palette-slate hover:bg-palette-cream/10 hover:text-palette-mist'}`
                 }
               >
                 <Warehouse className="w-5 h-5" />
