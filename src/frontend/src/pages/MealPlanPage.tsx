@@ -3,8 +3,9 @@ import { useApp } from '../context/AppContext';
 import { useRecipesList } from '../api/mealmodeAPI';
 import type { Recipe } from '../api/mealmodeAPI';
 import { useNavigate } from 'react-router-dom';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Search } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import {
   Dialog,
@@ -115,6 +116,13 @@ function MealPlanContent() {
   }, [recipeData]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedMealId, setSelectedMealId] = useState<string | null>(null);
+  const [viewAllSearchTerm, setViewAllSearchTerm] = useState('');
+
+  const filteredRecipesForDialog = useMemo(() => {
+    if (!viewAllSearchTerm.trim()) return recipes;
+    const q = viewAllSearchTerm.toLowerCase();
+    return recipes.filter((r) => r.name.toLowerCase().includes(q));
+  }, [recipes, viewAllSearchTerm]);
   
   const handlePlace = (day: string, slot: string) => {
     if (!selectedMealId) return;
@@ -143,7 +151,7 @@ function MealPlanContent() {
           <h2 className="text-2xl font-semibold text-palette-taupe mb-2">Meal Plan</h2>
           <p className="text-palette-slate">Click a meal, then click a slot to add it to your plan</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setViewAllSearchTerm(''); }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -154,18 +162,32 @@ function MealPlanContent() {
             <DialogHeader>
               <DialogTitle>Pick a Meal for Your Plan</DialogTitle>
             </DialogHeader>
+            <div className="relative mt-4 mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-palette-slate" />
+              <Input
+                type="text"
+                placeholder="Search meals..."
+                value={viewAllSearchTerm}
+                onChange={(e) => setViewAllSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
               {isLoading ? (
                 <p className="text-palette-slate col-span-2">Loading meals…</p>
               ) : (
-                recipes.map((recipe) => (
+                filteredRecipesForDialog.map((recipe) => (
                   <SelectableMeal
                     key={recipe.id}
                     mealId={String(recipe.id)}
                     mealName={recipe.name}
                     servings={recipe.servings ?? 1}
                     selected={selectedMealId === String(recipe.id)}
-                    onSelect={() => setSelectedMealId((id) => (id === String(recipe.id) ? null : String(recipe.id)))}
+                    onSelect={() => {
+                      const id = String(recipe.id);
+                      setSelectedMealId((prev) => (prev === id ? null : id));
+                      if (selectedMealId !== id) setIsDialogOpen(false);
+                    }}
                   />
                 ))
               )}

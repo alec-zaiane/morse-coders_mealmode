@@ -276,6 +276,7 @@ export interface PatchedRecipe {
   readonly id?: number;
   readonly ingredients_list?: readonly RecipeIngredient[];
   recipe_ingredients?: RecipeIngredientWrite[];
+  recipe_steps?: RecipeStepWrite[];
   readonly tags?: readonly Tag[];
   readonly steps?: readonly RecipeStep[];
   /** @maxLength 100 */
@@ -311,6 +312,7 @@ export interface Recipe {
   readonly id: number;
   readonly ingredients_list: readonly RecipeIngredient[];
   recipe_ingredients?: RecipeIngredientWrite[];
+  recipe_steps?: RecipeStepWrite[];
   readonly tags: readonly Tag[];
   readonly steps: readonly RecipeStep[];
   /** @maxLength 100 */
@@ -361,6 +363,15 @@ export interface RecipeStep {
   step_number: number;
   description: string;
   recipe: number;
+}
+
+/**
+ * For create/update: list of {step_number, description}.
+ */
+export interface RecipeStepWrite {
+  /** @minimum 1 */
+  step_number: number;
+  description: string;
 }
 
 export interface Tag {
