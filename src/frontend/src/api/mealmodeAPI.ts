@@ -79,14 +79,14 @@ export type IngredientOnHand = OnHandIngredient | null;
 
 export interface Ingredient {
   readonly id: number;
-  /** @maxLength 100 */
+  /** @maxLength 256 */
   name: string;
   readonly nutrition_stats: NutritionStats;
   /**
-   * Lowest known cost per base unit (e.g., $/kg
+   * Estimated per base unit (e.g., $/kg), used as a fallback if no on-hand cost data is available
    * @nullable
    */
-  lowest_cost?: number | null;
+  estimated_cost?: number | null;
   /** @nullable */
   readonly on_hand: IngredientOnHand;
 }
@@ -238,14 +238,14 @@ export type PatchedIngredientOnHand = OnHandIngredient | null;
 
 export interface PatchedIngredient {
   readonly id?: number;
-  /** @maxLength 100 */
+  /** @maxLength 256 */
   name?: string;
   readonly nutrition_stats?: NutritionStats;
   /**
-   * Lowest known cost per base unit (e.g., $/kg
+   * Estimated per base unit (e.g., $/kg), used as a fallback if no on-hand cost data is available
    * @nullable
    */
-  lowest_cost?: number | null;
+  estimated_cost?: number | null;
   /** @nullable */
   readonly on_hand?: PatchedIngredientOnHand;
 }

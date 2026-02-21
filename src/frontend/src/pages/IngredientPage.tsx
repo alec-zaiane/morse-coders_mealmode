@@ -5,10 +5,12 @@ import { ArrowLeft, Refrigerator } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useIngredientsRetrieve,
+  useIngredientsPartialUpdate,
   useRecipesList,
   useIngredientStoreCreate,
   useIngredientStorePartialUpdate,
   getIngredientsRetrieveQueryKey,
+  getRecipesListQueryKey,
 } from '../api/mealmodeAPI';
 import type { Ingredient, OnHandIngredient } from '../api/mealmodeAPI';
 import { Button } from '../components/ui/button';
@@ -24,14 +26,16 @@ type OnHandFormValues = {
   desired_quantity: string;
   warning_quantity: string;
   notes: string;
+  estimated_cost?: string;
 };
 
-function onHandToFormValues(oh: OnHandIngredient | null | undefined): OnHandFormValues {
+function ingredientToFormValues(ingredient: Ingredient | null | undefined): OnHandFormValues {
   return {
-    quantity: oh?.quantity == null ? '' : String(oh.quantity),
-    desired_quantity: oh?.desired_quantity == null ? '' : String(oh.desired_quantity),
-    warning_quantity: oh?.warning_quantity == null ? '' : String(oh.warning_quantity),
-    notes: oh?.notes ?? '',
+    quantity: ingredient?.on_hand?.quantity == null ? '' : String(ingredient.on_hand?.quantity),
+    desired_quantity: ingredient?.on_hand?.desired_quantity == null ? '' : String(ingredient.on_hand?.desired_quantity),
+    warning_quantity: ingredient?.on_hand?.warning_quantity == null ? '' : String(ingredient.on_hand?.warning_quantity),
+    notes: ingredient?.on_hand?.notes ?? '',
+    estimated_cost: ingredient?.estimated_cost == null ? '' : String(ingredient.estimated_cost),
   };
 }
 
@@ -51,31 +55,37 @@ function OnHandForm({
   readonly existing: OnHandIngredient | null | undefined;
   readonly onSaved: () => void;
 }) {
-  const [values, setValues] = useState<OnHandFormValues>(() => onHandToFormValues(existing));
+  const [values, setValues] = useState<OnHandFormValues>(() => ingredientToFormValues(ingredient));
   const [editing, setEditing] = useState(!existing);
 
   useEffect(() => {
-    setValues(onHandToFormValues(existing));
+    setValues(ingredientToFormValues(ingredient));
     setEditing(!existing);
-  }, [existing]);
+  }, [ingredient, existing]);
 
   const createMutation = useIngredientStoreCreate();
   const patchMutation = useIngredientStorePartialUpdate();
-  const isPending = createMutation.isPending || patchMutation.isPending;
+  const patchIngredient = useIngredientsPartialUpdate();
+  const queryClient = useQueryClient();
+  const isPending = createMutation.isPending || patchMutation.isPending || patchIngredient.isPending;
 
   const handleSave = useCallback(() => {
-    const payload = {
+    const onHandPayload = {
       quantity: parseOpt(values.quantity),
       desired_quantity: parseOpt(values.desired_quantity),
       warning_quantity: parseOpt(values.warning_quantity),
       notes: values.notes,
     };
+    patchIngredient.mutate(
+      { id: ingredientId, data: { estimated_cost: parseOpt(values.estimated_cost ?? '') } },
+      { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getRecipesListQueryKey() }); } },
+    );
     if (existing) {
-      patchMutation.mutate({ id: existing.id, data: payload }, { onSuccess: () => { setEditing(false); onSaved(); } });
+      patchMutation.mutate({ id: existing.id, data: onHandPayload }, { onSuccess: () => { setEditing(false); onSaved(); } });
     } else {
-      createMutation.mutate({ data: { ...payload, ingredient: ingredientId } }, { onSuccess: () => { setEditing(false); onSaved(); } });
+      createMutation.mutate({ data: { ...onHandPayload, ingredient: ingredientId } }, { onSuccess: () => { setEditing(false); onSaved(); } });
     }
-  }, [values, existing, ingredientId, onSaved, createMutation, patchMutation]);
+  }, [values, existing, ingredientId, onSaved, createMutation, patchMutation, patchIngredient, queryClient]);
 
   function field(label: string, key: keyof OnHandFormValues, unit?: string) {
     return (
@@ -109,6 +119,7 @@ function OnHandForm({
           <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Edit</Button>
         )}
       </div>
+      {field('Estimated cost', 'estimated_cost', '$/' + (ingredient.nutrition_stats?.base_unit ?? 'unit'))}
       {field('Quantity on hand', 'quantity', ingredient.nutrition_stats?.base_unit)}
       {field('Desired quantity', 'desired_quantity', ingredient.nutrition_stats?.base_unit)}
       {field('Warning below', 'warning_quantity', ingredient.nutrition_stats?.base_unit)}
@@ -131,7 +142,7 @@ function OnHandForm({
             {isPending ? 'Saving…' : 'Save'}
           </Button>
           {existing && (
-            <Button size="sm" variant="outline" onClick={() => { setEditing(false); setValues(onHandToFormValues(existing)); }}>
+            <Button size="sm" variant="outline" onClick={() => { setEditing(false); setValues(ingredientToFormValues(ingredient)); }}>
               Cancel
             </Button>
           )}

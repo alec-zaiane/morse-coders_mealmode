@@ -93,10 +93,12 @@ class NutritionStats(models.Model):
 
 class Ingredient(models.Model):
     name: models.CharField[str, str] = models.CharField(max_length=256)
-    lowest_cost: NullableFloatField = models.FloatField(
+    estimated_cost: NullableFloatField = models.FloatField(
         null=True,
         blank=True,
-        help_text=_("Lowest known cost per base unit (e.g., $/kg"),
+        help_text=_(
+            "Estimated per base unit (e.g., $/kg), used as a fallback if no on-hand cost data is available"
+        ),
     )
 
     if TYPE_CHECKING:

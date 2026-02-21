@@ -43,11 +43,11 @@ export function multiplyNutritionStats(
 
 export function calculateRecipeCost(recipe: Recipe): { costPerServing: number, costTotal: number, costPartiallyUnknown: boolean } {
   let total = recipe.ingredients_list.reduce((acc, ri) => {
-    const costPerUnit = ri.ingredient.lowest_cost ?? 0;
+    const costPerUnit = ri.ingredient.estimated_cost ?? 0;
     return acc + ri.quantity * costPerUnit;
   }, 0)
 
-  let partiallyUnknown = recipe.ingredients_list.some(ri => ri.ingredient.lowest_cost === null);
+  let partiallyUnknown = recipe.ingredients_list.some(ri => ri.ingredient.estimated_cost === null);
 
   return {
     costTotal: total,

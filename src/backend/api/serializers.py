@@ -19,7 +19,7 @@ class IngredientSerializer(serializers.ModelSerializer[models.Ingredient]):
             "id",
             "name",
             "nutrition_stats",
-            "lowest_cost",
+            "estimated_cost",
             "on_hand",
         )
 
@@ -69,9 +69,7 @@ class RecipeSerializer(serializers.ModelSerializer[models.Recipe]):
     recipe_ingredients = RecipeIngredientWriteSerializer(
         many=True, required=False, write_only=True
     )
-    recipe_steps = RecipeStepWriteSerializer(
-        many=True, required=False, write_only=True
-    )
+    recipe_steps = RecipeStepWriteSerializer(many=True, required=False, write_only=True)
     tags = TagSerializer(many=True, read_only=True)
     steps = RecipeStepSerializer(many=True, read_only=True)
 

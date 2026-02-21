@@ -22,7 +22,6 @@ paths:
       tags:
       - ingredient-store
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -49,7 +48,6 @@ paths:
               $ref: '#/components/schemas/OnHandIngredient'
         required: true
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -72,7 +70,6 @@ paths:
       tags:
       - ingredient-store
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -106,7 +103,6 @@ paths:
               $ref: '#/components/schemas/OnHandIngredient'
         required: true
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -139,7 +135,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOnHandIngredient'
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -161,7 +156,6 @@ paths:
       tags:
       - ingredient-store
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -196,7 +190,6 @@ paths:
       tags:
       - ingredients
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -223,7 +216,6 @@ paths:
               $ref: '#/components/schemas/Ingredient'
         required: true
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -246,7 +238,6 @@ paths:
       tags:
       - ingredients
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -280,7 +271,6 @@ paths:
               $ref: '#/components/schemas/Ingredient'
         required: true
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -313,7 +303,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedIngredient'
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -335,7 +324,6 @@ paths:
       tags:
       - ingredients
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -360,7 +348,6 @@ paths:
       tags:
       - recipes
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -387,7 +374,6 @@ paths:
               $ref: '#/components/schemas/Recipe'
         required: true
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -410,7 +396,6 @@ paths:
       tags:
       - recipes
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -444,7 +429,6 @@ paths:
               $ref: '#/components/schemas/Recipe'
         required: true
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -477,7 +461,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRecipe'
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -499,7 +482,6 @@ paths:
       tags:
       - recipes
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -524,7 +506,6 @@ paths:
       tags:
       - tags
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -551,7 +532,6 @@ paths:
               $ref: '#/components/schemas/Tag'
         required: true
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -574,7 +554,6 @@ paths:
       tags:
       - tags
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -608,7 +587,6 @@ paths:
               $ref: '#/components/schemas/Tag'
         required: true
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -641,7 +619,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedTag'
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -663,7 +640,6 @@ paths:
       tags:
       - tags
       security:
-      - cookieAuth: []
       - basicAuth: []
       - {}
       responses:
@@ -689,16 +665,17 @@ components:
           readOnly: true
         name:
           type: string
-          maxLength: 100
+          maxLength: 256
         nutrition_stats:
           allOf:
           - $ref: '#/components/schemas/NutritionStats'
           readOnly: true
-        lowest_cost:
+        estimated_cost:
           type: number
           format: double
           nullable: true
-          description: Lowest known cost per base unit (e.g., $/kg
+          description: Estimated per base unit (e.g., $/kg), used as a fallback if
+            no on-hand cost data is available
         on_hand:
           allOf:
           - $ref: '#/components/schemas/OnHandIngredient'
@@ -930,16 +907,17 @@ components:
           readOnly: true
         name:
           type: string
-          maxLength: 100
+          maxLength: 256
         nutrition_stats:
           allOf:
           - $ref: '#/components/schemas/NutritionStats'
           readOnly: true
-        lowest_cost:
+        estimated_cost:
           type: number
           format: double
           nullable: true
-          description: Lowest known cost per base unit (e.g., $/kg
+          description: Estimated per base unit (e.g., $/kg), used as a fallback if
+            no on-hand cost data is available
         on_hand:
           allOf:
           - $ref: '#/components/schemas/OnHandIngredient'
@@ -1185,7 +1163,3 @@ components:
     basicAuth:
       type: http
       scheme: basic
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: sessionid
