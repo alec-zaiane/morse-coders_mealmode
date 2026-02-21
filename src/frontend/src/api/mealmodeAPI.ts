@@ -261,6 +261,8 @@ export interface PatchedOnHandIngredient {
 export interface PatchedRecipe {
   readonly id?: number;
   readonly ingredients_list?: readonly RecipeIngredient[];
+  recipe_ingredients?: RecipeIngredientWrite[];
+  recipe_steps?: RecipeStepWrite[];
   readonly tags?: readonly Tag[];
   readonly steps?: readonly RecipeStep[];
   /** @maxLength 100 */
@@ -295,6 +297,8 @@ export interface PatchedTag {
 export interface Recipe {
   readonly id: number;
   readonly ingredients_list: readonly RecipeIngredient[];
+  recipe_ingredients?: RecipeIngredientWrite[];
+  recipe_steps?: RecipeStepWrite[];
   readonly tags: readonly Tag[];
   readonly steps: readonly RecipeStep[];
   /** @maxLength 100 */
@@ -327,6 +331,15 @@ export interface RecipeIngredient {
   quantity: number;
 }
 
+/**
+ * For create/update: list of {ingredient: id, quantity}.
+ */
+export interface RecipeIngredientWrite {
+  ingredient: number;
+  /** @minimum 0 */
+  quantity: number;
+}
+
 export interface RecipeStep {
   readonly id: number;
   /**
@@ -336,6 +349,15 @@ export interface RecipeStep {
   step_number: number;
   description: string;
   recipe: number;
+}
+
+/**
+ * For create/update: list of {step_number, description}.
+ */
+export interface RecipeStepWrite {
+  /** @minimum 1 */
+  step_number: number;
+  description: string;
 }
 
 export interface Tag {
@@ -365,7 +387,7 @@ limit?: number;
  */
 offset?: number;
 /**
- * Search ingredients by name (server-side).
+ * A search term.
  */
 search?: string;
 };

@@ -242,15 +242,17 @@ export function MealDetailPage() {
             </CardHeader>
             <CardContent>
               {recipe.steps.length ? (
-                <ol className="list-decimal list-inside space-y-2">
+                <ol className="space-y-3">
                   {recipe.steps.map((step) => (
-                    <li key={step.step_number} className="text-sm text-palette-slate">
-                      {step.description}
+                    <li key={step.step_number} className="flex gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-palette-terracotta text-palette-cream flex items-center justify-center text-sm font-medium">
+                        {step.step_number}
+                      </span>
+                      <span className="text-sm text-palette-slate pt-0.5">{step.description}</span>
                     </li>
                   ))}
                 </ol>
               ) : (
-                // TODO a click to edit instructions
                 <p className="text-sm text-palette-slate">No instructions in database.</p>
               )}
             </CardContent>

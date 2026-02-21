@@ -56,6 +56,7 @@ export function MealListPage() {
   const [addMealOpen, setAddMealOpen] = useState(false);
   const [newMealName, setNewMealName] = useState('');
   const [newMealServings, setNewMealServings] = useState(1);
+  const [newMealSteps, setNewMealSteps] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<SelectedIngredient[]>([]);
   const [ingredientDropdownOpen, setIngredientDropdownOpen] = useState(false);
   const ingredientDropdownRef = useRef<HTMLDivElement>(null);
@@ -111,10 +112,15 @@ export function MealListPage() {
     );
   };
 
+  const addStep = () => setNewMealSteps((prev) => [...prev, '']);
+  const removeStep = (index: number) => setNewMealSteps((prev) => prev.filter((_, i) => i !== index));
+  const setStep = (index: number, value: string) =>
+    setNewMealSteps((prev) => prev.map((s, i) => (i === index ? value : s)));
 
   const handleAddMeal = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMealName.trim()) return;
+    const stepsFiltered = newMealSteps.map((s) => s.trim()).filter(Boolean);
     const payload = {
       name: newMealName.trim(),
       servings: newMealServings,
@@ -124,10 +130,17 @@ export function MealListPage() {
           quantity,
         })),
       }),
+      ...(stepsFiltered.length > 0 && {
+        recipe_steps: stepsFiltered.map((description, i) => ({
+          step_number: i + 1,
+          description,
+        })),
+      }),
     };
-    createRecipe.mutate({ data: payload as { name: string; servings: number; recipe_ingredients?: { ingredient: number; quantity: number }[] } });
+    createRecipe.mutate({ data: payload });
     setNewMealName('');
     setNewMealServings(1);
+    setNewMealSteps([]);
     setSelectedIngredients([]);
     setIngredientSearch('');
     setAddMealOpen(false);
@@ -248,6 +261,38 @@ export function MealListPage() {
                     </div>
                   )}
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-palette-slate mb-1">Steps</label>
+                {newMealSteps.length > 0 && (
+                  <ul className="space-y-2 mb-3 p-3 border border-palette-mist rounded-md bg-palette-cream/30">
+                    {newMealSteps.map((step, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm">
+                        <span className="shrink-0 w-5 text-palette-slate font-medium">{index + 1}.</span>
+                        <Input
+                          value={step}
+                          onChange={(e) => setStep(index, e.target.value)}
+                          placeholder={`Step ${index + 1}`}
+                          className="flex-1 h-8"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 shrink-0 p-0"
+                          onClick={() => removeStep(index)}
+                          aria-label="Remove step"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <Button type="button" variant="outline" size="sm" onClick={addStep} className="w-full justify-center">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add step
+                </Button>
               </div>
               {createRecipe.isError && (
                 <p className="text-sm text-red-600">Failed to create meal. Try again.</p>
