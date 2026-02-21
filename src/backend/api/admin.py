@@ -87,10 +87,15 @@ class RecipeTagAdmin(admin.ModelAdmin[models.RecipeTag]):
         return obj.recipes.count()
 
 
+class RecipeStepInline(admin.TabularInline[models.RecipeStep, models.RecipeStep]):
+    model = models.RecipeStep
+    extra = 1
+
+
 @register(models.Recipe)
 class RecipeAdmin(admin.ModelAdmin[models.Recipe]):
     list_display = ("name", "ingredients_list")
-    inlines = [RecipeIngredientInline]  # type: ignore
+    inlines = [RecipeIngredientInline, RecipeStepInline]  # type: ignore
 
     @admin.display(description="Ingredients")
     def ingredients_list(self, obj: models.Recipe) -> str:

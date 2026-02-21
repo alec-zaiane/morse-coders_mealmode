@@ -7,8 +7,8 @@ import { calculateRecipeCost, calculateRecipeNutrition } from "../utils/calculat
 
 export function RecipeCard({ recipe }: { recipe: Recipe }) {
     const navigate = useNavigate();
-    const { costPerServing, costTotal, costPartiallyUnknown } = calculateRecipeCost(recipe);
-    const { nutritionPerServing, nutritionTotal } = calculateRecipeNutrition(recipe);
+    const { costPerServing, costPartiallyUnknown } = calculateRecipeCost(recipe);
+    const { nutritionPerServing } = calculateRecipeNutrition(recipe);
 
     return (<Card
         key={recipe.id}
@@ -23,7 +23,7 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
                 <div className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-1 text-palette-slate">
                         <DollarSign className="w-4 h-4" />
-                        <span>{costPerServing.toFixed(2)}/serving</span>
+                        <span>{costPerServing.toFixed(2)}/serving{costPartiallyUnknown && "?"}</span>
                     </div>
                     <div className="flex items-center gap-1 text-palette-terracotta">
                         <Flame className="w-4 h-4" />
@@ -38,8 +38,9 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
                         </Badge>
                     ))}
                 </div>
-                <div className="text-xs text-palette-taupe">
-                    {/* Prep: {meal.prepTime}m • Cook: {meal.cookTime}m */}
+                <div className="text-xs text-palette-taupe flex gap-2">
+                    {recipe.prep_time_minutes && (<div>Prep time: {recipe.prep_time_minutes}m</div>)}
+                    {recipe.cook_time_minutes && (<div>Cook time: {recipe.cook_time_minutes}m</div>)}
                 </div>
             </div>
         </CardContent>

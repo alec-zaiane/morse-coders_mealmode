@@ -148,6 +148,20 @@ class RecipeTag(models.Model):
         return self.name
 
 
+class RecipeStep(models.Model):
+    recipe: "models.ForeignKey[Recipe]" = models.ForeignKey(
+        "Recipe",
+        on_delete=models.CASCADE,
+        related_name="steps",
+    )
+    step_number: models.IntegerField[int, int] = models.IntegerField()
+    description: models.TextField[str, str] = models.TextField()
+
+    class Meta:
+        unique_together = ("recipe", "step_number")
+        ordering = ["step_number"]
+
+
 class Recipe(models.Model):
     name: models.CharField[str, str] = models.CharField(max_length=100)
     ingredients = models.ManyToManyField(Ingredient, through=RecipeIngredient)
@@ -157,8 +171,18 @@ class Recipe(models.Model):
     tags: models.ManyToManyField[RecipeTag, RecipeTag] = models.ManyToManyField(
         RecipeTag, blank=True, related_name="recipes"
     )
+    prep_time_minutes: NullableFloatField = models.FloatField(
+        null=True, blank=True, help_text=_("Preparation time in minutes")
+    )
+    cook_time_minutes: NullableFloatField = models.FloatField(
+        null=True, blank=True, help_text=_("Cooking time in minutes")
+    )
+    notes: models.TextField[Optional[str], Optional[str]] = models.TextField(
+        blank=True, help_text=_("Optional notes about the recipe")
+    )
 
     if TYPE_CHECKING:
         from django_stubs_ext.db.models.manager import RelatedManager
 
+        steps: "RelatedManager[RecipeStep]"
         ingredients_list: "RelatedManager[RecipeIngredient]"
