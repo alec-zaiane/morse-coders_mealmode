@@ -11,4 +11,5 @@ dependencies = [
     "djangorestframework>=3.16.1",
     "djangorestframework-stubs[compatible-mpypy]>=3.16.8",
     "drf-spectacular>=0.29.0",
+    "requests>=2.32.0",
 ]
