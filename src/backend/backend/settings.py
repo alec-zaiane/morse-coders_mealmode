@@ -148,4 +148,12 @@ SPECTACULAR_SETTINGS: dict[str, Any] = {
 # CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://localhost",
+    "http://localhost",
+]
+
+CORS_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "https://localhost",
+    "http://localhost",
 ]

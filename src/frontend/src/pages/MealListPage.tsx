@@ -72,7 +72,7 @@ export function MealListPage() {
   }, [ingredientDropdownOpen]);
 
   const filteredMeals = useMemo(() => {
-    return recipeData?.data.results.filter((recipe) => {
+    return recipeData?.data.results?.filter((recipe) => {
       if (searchTerm && !recipe.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
       if (selectedTags.length > 0 && !selectedTags.some((tag) => recipe.tags?.some((t) => t.id === tag.id))) return false;
       if (maxCost !== null) {
@@ -307,7 +307,7 @@ export function MealListPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {tagData?.data.results.map((tag) => (
+          {tagData?.data.results?.map((tag) => (
             <Badge
               key={tag.id}
               variant={selectedTags.includes(tag) ? 'default' : 'outline'}

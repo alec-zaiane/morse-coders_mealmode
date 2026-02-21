@@ -389,6 +389,7 @@ limit?: number;
  * The initial index from which to return the results.
  */
 offset?: number;
+on_hand__isnull?: boolean;
 /**
  * A search term.
  */

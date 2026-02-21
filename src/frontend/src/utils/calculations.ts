@@ -1,7 +1,7 @@
-import type { NutritionStats, Recipe, RecipeIngredient, Ingredient, BaseUnitEnum } from '../api/mealmodeAPI';
+import type { NutritionStats, Recipe } from '../api/mealmodeAPI';
 
 type NonNullableFields<T> = { [K in keyof T]: NonNullable<T[K]> };
-type NullableFields<T> = { [K in keyof T]: T[K] | undefined };
+// type NullableFields<T> = { [K in keyof T]: T[K] | undefined };
 
 export type NutritionStatsAggregated = NonNullableFields<Required<Omit<NutritionStats, "id" | "base_unit" | "ingredient">>>;
 

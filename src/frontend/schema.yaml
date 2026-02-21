@@ -183,6 +183,10 @@ paths:
         description: The initial index from which to return the results.
         schema:
           type: integer
+      - in: query
+        name: on_hand__isnull
+        schema:
+          type: boolean
       - name: search
         required: false
         in: query
