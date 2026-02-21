@@ -13,7 +13,7 @@ class IngredientSerializer(serializers.ModelSerializer[models.Ingredient]):
 
     class Meta:  # type: ignore
         model = models.Ingredient
-        fields = ("id", "name", "nutrition_stats")
+        fields = ("id", "name", "nutrition_stats", "lowest_cost")
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer[models.RecipeIngredient]):

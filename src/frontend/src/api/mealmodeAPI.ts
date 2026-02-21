@@ -77,6 +77,11 @@ export interface Ingredient {
   /** @maxLength 100 */
   name: string;
   readonly nutrition_stats: NutritionStats;
+  /**
+   * Lowest known cost per base unit (e.g., $/kg
+   * @nullable
+   */
+  lowest_cost?: number | null;
 }
 
 export interface NutritionStats {
@@ -184,6 +189,11 @@ export interface PatchedIngredient {
   /** @maxLength 100 */
   name?: string;
   readonly nutrition_stats?: NutritionStats;
+  /**
+   * Lowest known cost per base unit (e.g., $/kg
+   * @nullable
+   */
+  lowest_cost?: number | null;
 }
 
 export interface PatchedRecipe {

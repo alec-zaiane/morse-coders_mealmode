@@ -1,86 +1,71 @@
-import type { Meal, Ingredient } from '../types';
-import type { NutritionStats } from '../api/mealmodeAPI';
+import type { NutritionStats, Recipe, RecipeIngredient, Ingredient, BaseUnitEnum } from '../api/mealmodeAPI';
 
-export function getIngredientById(ingredients: Ingredient[], id: string): Ingredient | undefined {
-  return ingredients.find((i) => i.id === id);
+type NonNullableFields<T> = { [K in keyof T]: NonNullable<T[K]> };
+type NullableFields<T> = { [K in keyof T]: T[K] | undefined };
+
+export type NutritionStatsAggregated = NonNullableFields<Required<Omit<NutritionStats, "id" | "base_unit" | "ingredient">>>;
+
+const NUTRITION_KEYS: (keyof NutritionStatsAggregated)[] = [
+  "kcal_per_unit",
+  "fat_saturated_grams_per_unit",
+  "fat_trans_grams_per_unit",
+  "carbohydrate_fiber_grams_per_unit",
+  "carbohydrate_sugar_grams_per_unit",
+  "protein_grams_per_unit",
+  "cholesterol_milligrams_per_unit",
+  "sodium_milligrams_per_unit",
+  "potassium_milligrams_per_unit",
+  "calcium_milligrams_per_unit",
+  "iron_milligrams_per_unit",
+  "vitamin_a_milligrams_per_unit",
+  "vitamin_c_milligrams_per_unit",
+  "vitamin_d_milligrams_per_unit",
+];
+
+export function addNutritionStats(
+  stat1: Partial<NutritionStatsAggregated>,
+  stat2: Partial<NutritionStatsAggregated>
+): NutritionStatsAggregated {
+  return Object.fromEntries(
+    NUTRITION_KEYS.map((key) => [key, (stat1[key] ?? 0) + (stat2[key] ?? 0)])
+  ) as NutritionStatsAggregated;
 }
 
-export function calculateMealCost(
-  meal: Meal,
-  ingredients: Ingredient[],
-  servings: number
-): number {
-  const scale = servings / meal.servings;
-  return meal.ingredients.reduce((total, ri) => {
-    const ing = getIngredientById(ingredients, ri.ingredientId);
-    const costPerUnit = ing?.costPerUnit ?? 0;
-    return total + ri.quantity * costPerUnit * scale;
-  }, 0);
+export function multiplyNutritionStats(
+  stat: Partial<NutritionStats>,
+  coefficient: number
+): NutritionStatsAggregated {
+  return Object.fromEntries(
+    NUTRITION_KEYS.map((key) => [key, ((stat[key] ?? 0) * coefficient)])
+  ) as NutritionStatsAggregated
 }
 
-export function calculateCostPerServing(meal: Meal, ingredients: Ingredient[]): number {
-  const total = calculateMealCost(meal, ingredients, meal.servings);
-  return meal.servings > 0 ? total / meal.servings : 0;
-}
 
-export interface NutritionTotals {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-}
+export function calculateRecipeCost(recipe: Recipe): { costPerServing: number, costTotal: number, costPartiallyUnknown: boolean } {
+  let total = recipe.ingredients_list.reduce((acc, ri) => {
+    const costPerUnit = ri.ingredient.lowest_cost ?? 0;
+    return acc + ri.quantity * costPerUnit;
+  }, 0)
 
-export function calculateMealNutrition(
-  meal: Meal,
-  ingredients: Ingredient[],
-  servings: number = meal.servings
-): { perServing: NutritionTotals; total: NutritionTotals } {
-  const scale = servings / meal.servings;
-  const total: NutritionTotals = meal.ingredients.reduce(
-    (acc, ri) => {
-      const ing = getIngredientById(ingredients, ri.ingredientId);
-      const n = ing?.nutrition;
-      if (!n) return acc;
-      const mult = ri.quantity * scale;
-      return {
-        calories: acc.calories + (n.kcalPerUnit ?? 0) * mult,
-        protein: acc.protein + (n.proteinPerUnit ?? 0) * mult,
-        carbs: acc.carbs + (n.carbsPerUnit ?? 0) * mult,
-        fat: acc.fat + (n.fatPerUnit ?? 0) * mult,
-      };
-    },
-    { calories: 0, protein: 0, carbs: 0, fat: 0 }
-  );
+  let partiallyUnknown = recipe.ingredients_list.some(ri => ri.ingredient.lowest_cost === null);
+
   return {
-    perServing: {
-      calories: total.calories / servings,
-      protein: total.protein / servings,
-      carbs: total.carbs / servings,
-      fat: total.fat / servings,
-    },
-    total,
-  };
+    costTotal: total,
+    costPerServing: (recipe.servings && recipe.servings > 0) ? total / recipe.servings : 0,
+    costPartiallyUnknown: partiallyUnknown,
+  }
 }
 
-export interface IngredientBreakdownItem {
-  ingredient: Ingredient;
-  quantity: number;
-  cost: number;
-}
 
-export function getIngredientBreakdown(
-  meal: Meal,
-  ingredients: Ingredient[],
-  servings: number
-): IngredientBreakdownItem[] {
-  const scale = servings / meal.servings;
-  return meal.ingredients.map((ri) => {
-    const ing = getIngredientById(ingredients, ri.ingredientId);
-    const cost = (ing?.costPerUnit ?? 0) * ri.quantity * scale;
-    return {
-      ingredient: ing ?? { id: ri.ingredientId, name: 'Unknown', unit: ri.unit },
-      quantity: ri.quantity * scale,
-      cost,
-    };
-  });
+export function calculateRecipeNutrition(
+  recipe: Recipe,
+): { nutritionPerServing: NutritionStatsAggregated, nutritionTotal: NutritionStatsAggregated } {
+  let total = recipe.ingredients_list.map(ri => {
+    multiplyNutritionStats(ri.ingredient.nutrition_stats, ri.quantity)
+  }).reduce((acc, nutritionStats) => addNutritionStats(acc, nutritionStats ?? {}), {} as NutritionStatsAggregated)
+
+  return {
+    nutritionTotal: total,
+    nutritionPerServing: multiplyNutritionStats(total, 1 / (recipe.servings ?? 1)),
+  }
 }

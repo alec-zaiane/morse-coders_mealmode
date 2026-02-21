@@ -2,9 +2,12 @@ import type { Recipe } from "../api/mealmodeAPI";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { useNavigate } from "react-router-dom";
 import { DollarSign, Flame } from 'lucide-react';
+import { calculateRecipeCost, calculateRecipeNutrition } from "../utils/calculations";
 
 export function RecipeCard({ recipe }: { recipe: Recipe }) {
     const navigate = useNavigate();
+    const { costPerServing, costTotal, costPartiallyUnknown } = calculateRecipeCost(recipe);
+    const { nutritionPerServing, nutritionTotal } = calculateRecipeNutrition(recipe);
 
     return (<Card
         key={recipe.id}
@@ -17,14 +20,14 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
         <CardContent>
             <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm">
-                    {/* <div className="flex items-center gap-1 text-palette-slate">
+                    <div className="flex items-center gap-1 text-palette-slate">
                         <DollarSign className="w-4 h-4" />
                         <span>{costPerServing.toFixed(2)}/serving</span>
-                    </div> */}
-                    {/* <div className="flex items-center gap-1 text-palette-terracotta">
+                    </div>
+                    <div className="flex items-center gap-1 text-palette-terracotta">
                         <Flame className="w-4 h-4" />
-                        <span>{Math.round(nutrition.perServing.calories)} cal</span>
-                    </div> */}
+                        <span>{Math.round(nutritionPerServing.kcal_per_unit)} cal</span>
+                    </div>
                 </div>
                 <div className="text-sm text-palette-slate">{recipe.servings} servings</div>
                 <div className="flex flex-wrap gap-1">

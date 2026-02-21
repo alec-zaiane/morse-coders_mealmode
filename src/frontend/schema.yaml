@@ -356,6 +356,11 @@ components:
           allOf:
           - $ref: '#/components/schemas/NutritionStats'
           readOnly: true
+        lowest_cost:
+          type: number
+          format: double
+          nullable: true
+          description: Lowest known cost per base unit (e.g., $/kg
       required:
       - id
       - name
@@ -509,6 +514,11 @@ components:
           allOf:
           - $ref: '#/components/schemas/NutritionStats'
           readOnly: true
+        lowest_cost:
+          type: number
+          format: double
+          nullable: true
+          description: Lowest known cost per base unit (e.g., $/kg
     PatchedRecipe:
       type: object
       properties:

@@ -1,45 +1,34 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
-import { calculateCostPerServing, calculateMealNutrition } from '../utils/calculations';
+import { calculateRecipeNutrition, calculateRecipeCost } from '../utils/calculations';
 import { Search, DollarSign, Flame } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { RecipeCard } from '../components/recipecard';
 import { useRecipesList } from '../api/mealmodeAPI';
 
 export function MealListPage() {
-  const navigate = useNavigate();
-  const { meals, ingredients } = useApp();
+  const { data: recipeData, isError, isLoading } = useRecipesList();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [maxCost, setMaxCost] = useState<number | null>(null);
   const [maxCalories, setMaxCalories] = useState<number | null>(null);
-  const { data: recipeData, isError, isLoading } = useRecipesList();
-
-  const allTags = useMemo(() => {
-    const tags = new Set<string>();
-    meals.forEach((meal) => meal.tags.forEach((tag) => tags.add(tag)));
-    return Array.from(tags).sort();
-  }, [meals]);
 
   const filteredMeals = useMemo(() => {
-    return meals.filter((meal) => {
-      if (searchTerm && !meal.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-      if (selectedTags.length > 0 && !selectedTags.some((tag) => meal.tags.includes(tag))) return false;
+    return recipeData?.data.results.filter((recipe) => {
+      if (searchTerm && !recipe.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+      // if (selectedTags.length > 0 && !selectedTags.some((tag) => meal.tags.includes(tag))) return false;
       if (maxCost !== null) {
-        const costPerServing = calculateCostPerServing(meal, ingredients);
+        const { costPerServing } = calculateRecipeCost(recipe);
         if (costPerServing > maxCost) return false;
       }
       if (maxCalories !== null) {
-        const nutrition = calculateMealNutrition(meal, ingredients);
-        if (nutrition.perServing.calories > maxCalories) return false;
+        const { nutritionPerServing } = calculateRecipeNutrition(recipe);
+        if (nutritionPerServing.kcal_per_unit > maxCalories) return false;
       }
       return true;
     });
-  }, [meals, searchTerm, selectedTags, maxCost, maxCalories, ingredients]);
+  }, [recipeData, searchTerm, selectedTags, maxCost, maxCalories]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -95,7 +84,7 @@ export function MealListPage() {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        {/* <div className="flex flex-wrap gap-2">
           {allTags.map((tag) => (
             <Badge
               key={tag}
@@ -106,27 +95,28 @@ export function MealListPage() {
               {tag}
             </Badge>
           ))}
-        </div>
+        </div> */}
       </div>
-
-      <div className="mb-4 text-sm text-palette-slate">
-        Showing {filteredMeals.length} of {meals.length} meals
-      </div>
-
-      {!isLoading && recipeData && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {!isError && !isLoading && filteredMeals && (
+        <div>
+          <div className="mb-4 text-sm text-palette-slate">
+            Showing {filteredMeals.length} of {recipeData?.data.count ?? "unknown"} meals
+          </div>
           {
-            recipeData.data.results.map((recipe) => { return (<RecipeCard recipe={recipe} key={recipe.id} />) })
+            filteredMeals.length === 0 && (
+              <div className="text-center py-12 text-palette-taupe">
+                No meals found matching your criteria
+              </div>
+            )
           }
-        </div>
-
-      )}
-
-      {filteredMeals.length === 0 && (
-        <div className="text-center py-12 text-palette-taupe">
-          No meals found matching your criteria
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {
+              filteredMeals.map((recipe) => { return (<RecipeCard recipe={recipe} key={recipe.id} />) })
+            }
+          </div>
         </div>
       )}
+
     </div>
   );
 }

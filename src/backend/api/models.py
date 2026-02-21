@@ -93,6 +93,11 @@ class NutritionStats(models.Model):
 
 class Ingredient(models.Model):
     name: models.CharField[str, str] = models.CharField(max_length=100)
+    lowest_cost: NullableFloatField = models.FloatField(
+        null=True,
+        blank=True,
+        help_text=_("Lowest known cost per base unit (e.g., $/kg"),
+    )
 
     if TYPE_CHECKING:
         nutrition_stats: "models.OneToOneField[NutritionStats]"
