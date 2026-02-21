@@ -11,7 +11,7 @@ export function IngredientCard({ ingredient }: { ingredient: Ingredient }) {
 
     return (<Card
         key={ingredient.id}
-        className="transition-shadow p-4"
+        className="transition-all p-4 cursor-pointer hover:bg-palette-lightblue/90 hover:shadow-md"
     >
         <div className="flex items-center justify-between">
             <div>

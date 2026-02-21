@@ -11,6 +11,7 @@ export default {
       },
       colors: {
         palette: {
+          lightblue: '#d3ebff',
           slate: '#632024',
           mist: '#8db4d2',
           cream: '#d5b893', //Banners
