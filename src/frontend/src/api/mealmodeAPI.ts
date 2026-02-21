@@ -184,6 +184,15 @@ export interface PaginatedRecipeList {
   results: Recipe[];
 }
 
+export interface PaginatedTagList {
+  count: number;
+  /** @nullable */
+  next?: string | null;
+  /** @nullable */
+  previous?: string | null;
+  results: Tag[];
+}
+
 export interface PatchedIngredient {
   readonly id?: number;
   /** @maxLength 100 */
@@ -199,6 +208,7 @@ export interface PatchedIngredient {
 export interface PatchedRecipe {
   readonly id?: number;
   readonly ingredients_list?: readonly RecipeIngredient[];
+  readonly tags?: readonly Tag[];
   /** @maxLength 100 */
   name?: string;
   /**
@@ -210,9 +220,16 @@ export interface PatchedRecipe {
   readonly ingredients?: readonly number[];
 }
 
+export interface PatchedTag {
+  readonly id?: number;
+  /** @maxLength 50 */
+  name?: string;
+}
+
 export interface Recipe {
   readonly id: number;
   readonly ingredients_list: readonly RecipeIngredient[];
+  readonly tags: readonly Tag[];
   /** @maxLength 100 */
   name: string;
   /**
@@ -231,6 +248,12 @@ export interface RecipeIngredient {
   quantity: number;
 }
 
+export interface Tag {
+  readonly id: number;
+  /** @maxLength 50 */
+  name: string;
+}
+
 export type IngredientsListParams = {
 /**
  * Number of results to return per page.
@@ -243,6 +266,17 @@ offset?: number;
 };
 
 export type RecipesListParams = {
+/**
+ * Number of results to return per page.
+ */
+limit?: number;
+/**
+ * The initial index from which to return the results.
+ */
+offset?: number;
+};
+
+export type TagsListParams = {
 /**
  * Number of results to return per page.
  */
@@ -1039,6 +1073,401 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       > => {
 
       const mutationOptions = getRecipesDestroyMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const tagsList = (
+    params?: TagsListParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PaginatedTagList>> => {
+    
+    
+    return axios.default.get(
+      `http://localhost:8000/api/tags/`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getTagsListQueryKey = (params?: TagsListParams,) => {
+    return [
+    `http://localhost:8000/api/tags/`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getTagsListQueryOptions = <TData = Awaited<ReturnType<typeof tagsList>>, TError = AxiosError<unknown>>(params?: TagsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsList>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTagsListQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof tagsList>>> = ({ signal }) => tagsList(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof tagsList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TagsListQueryResult = NonNullable<Awaited<ReturnType<typeof tagsList>>>
+export type TagsListQueryError = AxiosError<unknown>
+
+
+export function useTagsList<TData = Awaited<ReturnType<typeof tagsList>>, TError = AxiosError<unknown>>(
+ params: undefined |  TagsListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof tagsList>>,
+          TError,
+          Awaited<ReturnType<typeof tagsList>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTagsList<TData = Awaited<ReturnType<typeof tagsList>>, TError = AxiosError<unknown>>(
+ params?: TagsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof tagsList>>,
+          TError,
+          Awaited<ReturnType<typeof tagsList>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTagsList<TData = Awaited<ReturnType<typeof tagsList>>, TError = AxiosError<unknown>>(
+ params?: TagsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsList>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useTagsList<TData = Awaited<ReturnType<typeof tagsList>>, TError = AxiosError<unknown>>(
+ params?: TagsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsList>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTagsListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+export const tagsCreate = (
+    tag: NonReadonly<Tag>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Tag>> => {
+    
+    
+    return axios.default.post(
+      `http://localhost:8000/api/tags/`,
+      tag,options
+    );
+  }
+
+
+
+export const getTagsCreateMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tagsCreate>>, TError,{data: NonReadonly<Tag>}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof tagsCreate>>, TError,{data: NonReadonly<Tag>}, TContext> => {
+
+const mutationKey = ['tagsCreate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof tagsCreate>>, {data: NonReadonly<Tag>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  tagsCreate(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TagsCreateMutationResult = NonNullable<Awaited<ReturnType<typeof tagsCreate>>>
+    export type TagsCreateMutationBody = NonReadonly<Tag>
+    export type TagsCreateMutationError = AxiosError<unknown>
+
+    export const useTagsCreate = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tagsCreate>>, TError,{data: NonReadonly<Tag>}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof tagsCreate>>,
+        TError,
+        {data: NonReadonly<Tag>},
+        TContext
+      > => {
+
+      const mutationOptions = getTagsCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const tagsRetrieve = (
+    id: number, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Tag>> => {
+    
+    
+    return axios.default.get(
+      `http://localhost:8000/api/tags/${id}/`,options
+    );
+  }
+
+
+
+
+export const getTagsRetrieveQueryKey = (id?: number,) => {
+    return [
+    `http://localhost:8000/api/tags/${id}/`
+    ] as const;
+    }
+
+    
+export const getTagsRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof tagsRetrieve>>, TError = AxiosError<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTagsRetrieveQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof tagsRetrieve>>> = ({ signal }) => tagsRetrieve(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof tagsRetrieve>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TagsRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof tagsRetrieve>>>
+export type TagsRetrieveQueryError = AxiosError<unknown>
+
+
+export function useTagsRetrieve<TData = Awaited<ReturnType<typeof tagsRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsRetrieve>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof tagsRetrieve>>,
+          TError,
+          Awaited<ReturnType<typeof tagsRetrieve>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTagsRetrieve<TData = Awaited<ReturnType<typeof tagsRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsRetrieve>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof tagsRetrieve>>,
+          TError,
+          Awaited<ReturnType<typeof tagsRetrieve>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTagsRetrieve<TData = Awaited<ReturnType<typeof tagsRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useTagsRetrieve<TData = Awaited<ReturnType<typeof tagsRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tagsRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTagsRetrieveQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+export const tagsUpdate = (
+    id: number,
+    tag: NonReadonly<Tag>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Tag>> => {
+    
+    
+    return axios.default.put(
+      `http://localhost:8000/api/tags/${id}/`,
+      tag,options
+    );
+  }
+
+
+
+export const getTagsUpdateMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tagsUpdate>>, TError,{id: number;data: NonReadonly<Tag>}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof tagsUpdate>>, TError,{id: number;data: NonReadonly<Tag>}, TContext> => {
+
+const mutationKey = ['tagsUpdate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof tagsUpdate>>, {id: number;data: NonReadonly<Tag>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  tagsUpdate(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TagsUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof tagsUpdate>>>
+    export type TagsUpdateMutationBody = NonReadonly<Tag>
+    export type TagsUpdateMutationError = AxiosError<unknown>
+
+    export const useTagsUpdate = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tagsUpdate>>, TError,{id: number;data: NonReadonly<Tag>}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof tagsUpdate>>,
+        TError,
+        {id: number;data: NonReadonly<Tag>},
+        TContext
+      > => {
+
+      const mutationOptions = getTagsUpdateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const tagsPartialUpdate = (
+    id: number,
+    patchedTag: NonReadonly<PatchedTag>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Tag>> => {
+    
+    
+    return axios.default.patch(
+      `http://localhost:8000/api/tags/${id}/`,
+      patchedTag,options
+    );
+  }
+
+
+
+export const getTagsPartialUpdateMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tagsPartialUpdate>>, TError,{id: number;data: NonReadonly<PatchedTag>}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof tagsPartialUpdate>>, TError,{id: number;data: NonReadonly<PatchedTag>}, TContext> => {
+
+const mutationKey = ['tagsPartialUpdate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof tagsPartialUpdate>>, {id: number;data: NonReadonly<PatchedTag>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  tagsPartialUpdate(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TagsPartialUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof tagsPartialUpdate>>>
+    export type TagsPartialUpdateMutationBody = NonReadonly<PatchedTag>
+    export type TagsPartialUpdateMutationError = AxiosError<unknown>
+
+    export const useTagsPartialUpdate = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tagsPartialUpdate>>, TError,{id: number;data: NonReadonly<PatchedTag>}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof tagsPartialUpdate>>,
+        TError,
+        {id: number;data: NonReadonly<PatchedTag>},
+        TContext
+      > => {
+
+      const mutationOptions = getTagsPartialUpdateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const tagsDestroy = (
+    id: number, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.default.delete(
+      `http://localhost:8000/api/tags/${id}/`,options
+    );
+  }
+
+
+
+export const getTagsDestroyMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tagsDestroy>>, TError,{id: number}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof tagsDestroy>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['tagsDestroy'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof tagsDestroy>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  tagsDestroy(id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TagsDestroyMutationResult = NonNullable<Awaited<ReturnType<typeof tagsDestroy>>>
+    
+    export type TagsDestroyMutationError = AxiosError<unknown>
+
+    export const useTagsDestroy = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof tagsDestroy>>, TError,{id: number}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof tagsDestroy>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+
+      const mutationOptions = getTagsDestroyMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

@@ -2,6 +2,7 @@ import type { Recipe } from "../api/mealmodeAPI";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { useNavigate } from "react-router-dom";
 import { DollarSign, Flame } from 'lucide-react';
+import { Badge } from "./ui/badge";
 import { calculateRecipeCost, calculateRecipeNutrition } from "../utils/calculations";
 
 export function RecipeCard({ recipe }: { recipe: Recipe }) {
@@ -26,16 +27,16 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
                     </div>
                     <div className="flex items-center gap-1 text-palette-terracotta">
                         <Flame className="w-4 h-4" />
-                        <span>{Math.round(nutritionPerServing.kcal_per_unit)} cal</span>
+                        <span>{Math.round(nutritionPerServing.kcal_per_unit)} Kcal/serving</span>
                     </div>
                 </div>
                 <div className="text-sm text-palette-slate">{recipe.servings} servings</div>
                 <div className="flex flex-wrap gap-1">
-                    {/* {meal.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
+                    {recipe.tags.map((tag) => (
+                        <Badge key={tag.id} variant="secondary" className="text-xs">
+                            {tag.name}
                         </Badge>
-                    ))} */}
+                    ))}
                 </div>
                 <div className="text-xs text-palette-taupe">
                     {/* Prep: {meal.prepTime}m • Cook: {meal.cookTime}m */}

@@ -5,19 +5,21 @@ import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { RecipeCard } from '../components/recipecard';
-import { useRecipesList } from '../api/mealmodeAPI';
+import { useRecipesList, useTagsList } from '../api/mealmodeAPI';
+import type { Tag } from '../api/mealmodeAPI';
 
 export function MealListPage() {
-  const { data: recipeData, isError, isLoading } = useRecipesList();
+  const { data: recipeData, isError: recipeIsError, isLoading: recipeIsLoading } = useRecipesList();
+  const { data: tagData, isError: tagIsError, isLoading: tagIsLoading } = useTagsList();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [maxCost, setMaxCost] = useState<number | null>(null);
   const [maxCalories, setMaxCalories] = useState<number | null>(null);
 
   const filteredMeals = useMemo(() => {
     return recipeData?.data.results.filter((recipe) => {
       if (searchTerm && !recipe.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-      // if (selectedTags.length > 0 && !selectedTags.some((tag) => meal.tags.includes(tag))) return false;
+      if (selectedTags.length > 0 && !selectedTags.some((tag) => recipe.tags?.some((t) => t.id === tag.id))) return false;
       if (maxCost !== null) {
         const { costPerServing } = calculateRecipeCost(recipe);
         if (costPerServing > maxCost) return false;
@@ -30,7 +32,7 @@ export function MealListPage() {
     });
   }, [recipeData, searchTerm, selectedTags, maxCost, maxCalories]);
 
-  const toggleTag = (tag: string) => {
+  const toggleTag = (tag: Tag) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
@@ -84,20 +86,20 @@ export function MealListPage() {
           )}
         </div>
 
-        {/* <div className="flex flex-wrap gap-2">
-          {allTags.map((tag) => (
+        <div className="flex flex-wrap gap-2">
+          {tagData?.data.results.map((tag) => (
             <Badge
-              key={tag}
+              key={tag.id}
               variant={selectedTags.includes(tag) ? 'default' : 'outline'}
               className="cursor-pointer"
               onClick={() => toggleTag(tag)}
             >
-              {tag}
+              {tag.name}
             </Badge>
           ))}
-        </div> */}
+        </div>
       </div>
-      {!isError && !isLoading && filteredMeals && (
+      {!recipeIsError && !recipeIsLoading && filteredMeals && (
         <div>
           <div className="mb-4 text-sm text-palette-slate">
             Showing {filteredMeals.length} of {recipeData?.data.count ?? "unknown"} meals

@@ -60,9 +60,8 @@ export function calculateRecipeCost(recipe: Recipe): { costPerServing: number, c
 export function calculateRecipeNutrition(
   recipe: Recipe,
 ): { nutritionPerServing: NutritionStatsAggregated, nutritionTotal: NutritionStatsAggregated } {
-  let total = recipe.ingredients_list.map(ri => {
-    multiplyNutritionStats(ri.ingredient.nutrition_stats, ri.quantity)
-  }).reduce((acc, nutritionStats) => addNutritionStats(acc, nutritionStats ?? {}), {} as NutritionStatsAggregated)
+  let total = recipe.ingredients_list.map(ri => multiplyNutritionStats(ri.ingredient.nutrition_stats, ri.quantity)
+  ).reduce((acc, nutritionStats) => addNutritionStats(acc, nutritionStats ?? {}), {} as NutritionStatsAggregated)
 
   return {
     nutritionTotal: total,
