@@ -209,6 +209,7 @@ export interface PatchedRecipe {
   readonly id?: number;
   readonly ingredients_list?: readonly RecipeIngredient[];
   readonly tags?: readonly Tag[];
+  readonly steps?: readonly RecipeStep[];
   /** @maxLength 100 */
   name?: string;
   /**
@@ -217,6 +218,18 @@ export interface PatchedRecipe {
    * @maximum 9223372036854776000
    */
   servings?: number;
+  /**
+   * Preparation time in minutes
+   * @nullable
+   */
+  prep_time_minutes?: number | null;
+  /**
+   * Cooking time in minutes
+   * @nullable
+   */
+  cook_time_minutes?: number | null;
+  /** Optional notes about the recipe */
+  notes?: string;
   readonly ingredients?: readonly number[];
 }
 
@@ -230,6 +243,7 @@ export interface Recipe {
   readonly id: number;
   readonly ingredients_list: readonly RecipeIngredient[];
   readonly tags: readonly Tag[];
+  readonly steps: readonly RecipeStep[];
   /** @maxLength 100 */
   name: string;
   /**
@@ -238,6 +252,18 @@ export interface Recipe {
    * @maximum 9223372036854776000
    */
   servings?: number;
+  /**
+   * Preparation time in minutes
+   * @nullable
+   */
+  prep_time_minutes?: number | null;
+  /**
+   * Cooking time in minutes
+   * @nullable
+   */
+  cook_time_minutes?: number | null;
+  /** Optional notes about the recipe */
+  notes?: string;
   readonly ingredients: readonly number[];
 }
 
@@ -246,6 +272,17 @@ export interface RecipeIngredient {
   readonly ingredient: Ingredient;
   /** Quantity in base units (e.g., grams, liters, pieces), defined by the ingredient's nutrition stats) */
   quantity: number;
+}
+
+export interface RecipeStep {
+  readonly id: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  step_number: number;
+  description: string;
+  recipe: number;
 }
 
 export interface Tag {

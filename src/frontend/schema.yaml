@@ -722,6 +722,11 @@ components:
           items:
             $ref: '#/components/schemas/Tag'
           readOnly: true
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeStep'
+          readOnly: true
         name:
           type: string
           maxLength: 100
@@ -731,6 +736,19 @@ components:
           minimum: -9223372036854775808
           format: int64
           description: Number of servings this recipe makes
+        prep_time_minutes:
+          type: number
+          format: double
+          nullable: true
+          description: Preparation time in minutes
+        cook_time_minutes:
+          type: number
+          format: double
+          nullable: true
+          description: Cooking time in minutes
+        notes:
+          type: string
+          description: Optional notes about the recipe
         ingredients:
           type: array
           items:
@@ -761,6 +779,11 @@ components:
           items:
             $ref: '#/components/schemas/Tag'
           readOnly: true
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeStep'
+          readOnly: true
         name:
           type: string
           maxLength: 100
@@ -770,6 +793,19 @@ components:
           minimum: -9223372036854775808
           format: int64
           description: Number of servings this recipe makes
+        prep_time_minutes:
+          type: number
+          format: double
+          nullable: true
+          description: Preparation time in minutes
+        cook_time_minutes:
+          type: number
+          format: double
+          nullable: true
+          description: Cooking time in minutes
+        notes:
+          type: string
+          description: Optional notes about the recipe
         ingredients:
           type: array
           items:
@@ -780,6 +816,7 @@ components:
       - ingredients
       - ingredients_list
       - name
+      - steps
       - tags
     RecipeIngredient:
       type: object
@@ -800,6 +837,26 @@ components:
       - id
       - ingredient
       - quantity
+    RecipeStep:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        step_number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        description:
+          type: string
+        recipe:
+          type: integer
+      required:
+      - description
+      - id
+      - recipe
+      - step_number
     Tag:
       type: object
       properties:
