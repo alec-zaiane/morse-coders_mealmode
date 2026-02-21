@@ -5,6 +5,7 @@ import { IngredientCard } from "../components/ingredientCard";
 import { Refrigerator } from "lucide-react";
 import { Button } from "../components/ui/button";
 
+// TODO put on-hand filter in the backend search
 export function IngredientListPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [showNIngredients, setShowNIngredients] = useState(50);

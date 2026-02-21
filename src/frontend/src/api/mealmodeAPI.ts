@@ -175,6 +175,7 @@ export interface NutritionStats {
 
 export interface OnHandIngredient {
   readonly id: number;
+  ingredient: number;
   /**
    * Quantity of the ingredient currently on hand
    * @nullable
@@ -192,7 +193,6 @@ export interface OnHandIngredient {
   warning_quantity?: number | null;
   /** Optional notes about the ingredient on hand */
   notes?: string;
-  ingredient: number;
 }
 
 export interface PaginatedIngredientList {
@@ -252,6 +252,7 @@ export interface PatchedIngredient {
 
 export interface PatchedOnHandIngredient {
   readonly id?: number;
+  ingredient?: number;
   /**
    * Quantity of the ingredient currently on hand
    * @nullable
@@ -269,7 +270,6 @@ export interface PatchedOnHandIngredient {
   warning_quantity?: number | null;
   /** Optional notes about the ingredient on hand */
   notes?: string;
-  ingredient?: number;
 }
 
 export interface PatchedRecipe {

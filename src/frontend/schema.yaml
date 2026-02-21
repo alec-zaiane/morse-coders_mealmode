@@ -801,6 +801,8 @@ components:
         id:
           type: integer
           readOnly: true
+        ingredient:
+          type: integer
         quantity:
           type: number
           format: double
@@ -821,8 +823,6 @@ components:
         notes:
           type: string
           description: Optional notes about the ingredient on hand
-        ingredient:
-          type: integer
       required:
       - id
       - ingredient
@@ -947,6 +947,8 @@ components:
         id:
           type: integer
           readOnly: true
+        ingredient:
+          type: integer
         quantity:
           type: number
           format: double
@@ -967,8 +969,6 @@ components:
         notes:
           type: string
           description: Optional notes about the ingredient on hand
-        ingredient:
-          type: integer
     PatchedRecipe:
       type: object
       properties:
