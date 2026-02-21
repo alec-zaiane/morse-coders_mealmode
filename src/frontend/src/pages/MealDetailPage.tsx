@@ -1,12 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
-import { calculateMealCost, calculateMealNutrition, getIngredientBreakdown } from '../utils/calculations';
-import { ArrowLeft, Users, Clock, DollarSign } from 'lucide-react';
+import { useRecipesRetrieve } from '../api/mealmodeAPI';
+import type { Recipe, RecipeIngredient } from '../api/mealmodeAPI';
+import { ArrowLeft, Users, DollarSign } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
-import { Badge } from '../components/ui/badge';
 import {
   Table,
   TableBody,
@@ -16,41 +15,86 @@ import {
   TableRow,
 } from '../components/ui/table';
 
+function recipeNutrition(
+  recipe: Recipe,
+  servings: number
+): { perServing: { calories: number; protein: number; carbs: number; fat: number }; total: { calories: number; protein: number; carbs: number; fat: number } } {
+  const scale = servings / (recipe.servings ?? 1);
+  let totalCal = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+  for (const ri of recipe.ingredients_list ?? []) {
+    const stats = ri.ingredient?.nutrition_stats;
+    if (!stats) continue;
+    const q = ri.quantity * scale;
+    totalCal += (stats.kcal_per_unit ?? 0) * q;
+    totalProtein += (stats.protein_grams_per_unit ?? 0) * q;
+    totalCarbs += ((stats.carbohydrate_fiber_grams_per_unit ?? 0) + (stats.carbohydrate_sugar_grams_per_unit ?? 0)) * q;
+    totalFat += (stats.fat_saturated_grams_per_unit ?? 0) * q;
+  }
+  return {
+    perServing: {
+      calories: totalCal / servings,
+      protein: totalProtein / servings,
+      carbs: totalCarbs / servings,
+      fat: totalFat / servings,
+    },
+    total: { calories: totalCal, protein: totalProtein, carbs: totalCarbs, fat: totalFat },
+  };
+}
+
 export function MealDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { meals, ingredients } = useApp();
+  const numericId = id != null ? Number(id) : NaN;
+  const { data, isLoading, isError } = useRecipesRetrieve(
+    Number.isNaN(numericId) ? 0 : numericId,
+    { query: { enabled: !Number.isNaN(numericId) && numericId > 0 } }
+  );
+  // API client may return unwrapped body (Recipe) or AxiosResponse (data.data = Recipe)
+  const recipe = data && typeof data === 'object' && 'data' in data && (data as { data?: Recipe }).data !== undefined
+    ? (data as { data: Recipe }).data
+    : (data as Recipe | undefined);
+  const baseServings = recipe?.servings ?? 1;
+  const [servings, setServings] = useState(baseServings);
+  useEffect(() => {
+    if (recipe?.servings != null) setServings(recipe.servings);
+  }, [recipe?.servings]);
 
-  const meal = meals.find((m) => m.id === id);
-  const [servings, setServings] = useState(meal?.servings ?? 1);
-
-  const breakdown = useMemo(() => {
-    if (!meal) return [];
-    return getIngredientBreakdown(meal, ingredients, servings);
-  }, [meal, ingredients, servings]);
-
-  const totalCost = useMemo(() => {
-    if (!meal) return 0;
-    return calculateMealCost(meal, ingredients, servings);
-  }, [meal, ingredients, servings]);
+  const scaledIngredients = useMemo(() => {
+    if (!recipe?.ingredients_list) return [];
+    const scale = servings / baseServings;
+    return recipe.ingredients_list.map((ri: RecipeIngredient) => ({
+      ingredient: ri.ingredient,
+      quantity: ri.quantity * scale,
+      unit: ri.ingredient?.nutrition_stats?.base_unit ?? '',
+    }));
+  }, [recipe, servings, baseServings]);
 
   const nutrition = useMemo(() => {
-    if (!meal) return null;
-    return calculateMealNutrition(meal, ingredients, servings);
-  }, [meal, ingredients, servings]);
+    if (!recipe) return null;
+    return recipeNutrition(recipe, servings);
+  }, [recipe, servings]);
 
-  if (!meal) {
+  if (Number.isNaN(numericId) || numericId < 1) {
     return (
       <div className="text-center py-12">
-        <p className="text-palette-taupe">Meal not found</p>
-        <Button onClick={() => navigate('/')} className="mt-4">
-          Back to Meals
-        </Button>
+        <p className="text-palette-taupe">Invalid recipe</p>
+        <Button onClick={() => navigate('/')} className="mt-4">Back to Meals</Button>
       </div>
     );
   }
 
-  const costPerServing = totalCost / servings;
+  if (isLoading) {
+    return <div className="text-center py-12 text-palette-slate">Loading…</div>;
+  }
+
+  if (isError || !recipe) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-palette-taupe">Meal not found</p>
+        <Button onClick={() => navigate('/')} className="mt-4">Back to Meals</Button>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -62,32 +106,14 @@ export function MealDetailPage() {
 
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-3xl font-semibold text-palette-taupe mb-2">{meal.name}</h2>
-            <div className="flex flex-wrap gap-2">
-              {meal.tags.map((tag) => (
-                <Badge key={tag} variant="palette-taupe">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
+            <h2 className="text-3xl font-semibold text-palette-taupe mb-2">{recipe.name}</h2>
           </div>
           <div className="text-right">
             <div className="flex items-center gap-2 text-palette-slate text-xl">
               <DollarSign className="w-6 h-6" />
-              <span>{costPerServing.toFixed(2)}/serving</span>
+              <span>—/serving</span>
             </div>
-            <div className="text-sm text-palette-taupe mt-1">${totalCost.toFixed(2)} total</div>
-          </div>
-        </div>
-
-        <div className="flex gap-4 mt-4 text-sm text-palette-slate">
-          <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            <span>Prep: {meal.prepTime}m</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            <span>Cook: {meal.cookTime}m</span>
+            <div className="text-sm text-palette-taupe mt-1">Cost not in database</div>
           </div>
         </div>
       </div>
@@ -115,7 +141,7 @@ export function MealDetailPage() {
                   type="number"
                   value={servings}
                   onChange={(e) => setServings(Math.max(1, Number(e.target.value)))}
-                  className="w-23 h-8 text-center text-sm py-1"
+                  className="w-14 h-8 text-center text-sm py-1"
                   min={1}
                 />
                 <Button
@@ -126,7 +152,7 @@ export function MealDetailPage() {
                 >
                   +
                 </Button>
-                <span className="text-xs text-palette-taupe">(Original: {meal.servings})</span>
+                <span className="text-xs text-palette-taupe">(Original: {baseServings})</span>
               </div>
             </CardContent>
           </Card>
@@ -141,49 +167,32 @@ export function MealDetailPage() {
                   <TableRow>
                     <TableHead>Ingredient</TableHead>
                     <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead className="text-right">Cost</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {breakdown.map((item, index) => (
-                    <TableRow
-                      key={index}
-                      className="cursor-pointer hover:bg-palette-mist"
-                      onClick={() => navigate(`/ingredient/${item.ingredient.id}`)}
-                    >
-                      <TableCell>{item.ingredient.name}</TableCell>
-                      <TableCell className="text-right">
-                        {item.quantity.toFixed(2)} {item.ingredient.unit}
+                  {scaledIngredients.length === 0 ? (
+                    <TableRow>
+                      <TableCell className="text-palette-taupe text-center py-4">
+                        No ingredients in database for this recipe.
                       </TableCell>
-                      <TableCell className="text-right">${item.cost.toFixed(2)}</TableCell>
+                      <TableCell className="text-palette-taupe text-center py-4" />
                     </TableRow>
-                  ))}
-                  <TableRow className="font-semibold">
-                    <TableCell colSpan={2}>Total</TableCell>
-                    <TableCell className="text-right">${totalCost.toFixed(2)}</TableCell>
-                  </TableRow>
+                  ) : (
+                    scaledIngredients.map((item, index) => (
+                      <TableRow
+                        key={item.ingredient?.id ?? index}
+                        className="cursor-pointer hover:bg-palette-mist"
+                        onClick={() => navigate(`/ingredient/${item.ingredient?.id}`)}
+                      >
+                        <TableCell>{item.ingredient?.name ?? '—'}</TableCell>
+                        <TableCell className="text-right">
+                          {item.quantity.toFixed(2)} {item.unit}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Cost Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-palette-slate">Total Cost:</span>
-                <span className="font-semibold">${totalCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-palette-slate">Cost per Serving:</span>
-                <span className="font-semibold">${costPerServing.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-palette-slate">Servings:</span>
-                <span className="font-semibold">{servings}</span>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -238,16 +247,7 @@ export function MealDetailPage() {
               <CardTitle>Cooking Instructions</CardTitle>
             </CardHeader>
             <CardContent>
-              <ol className="space-y-3">
-                {meal.steps.map((step, index) => (
-                  <li key={index} className="flex gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-palette-cream text-palette-terracotta flex items-center justify-center text-sm">
-                      {index + 1}
-                    </span>
-                    <span className="text-sm text-palette-slate pt-0.5">{step}</span>
-                  </li>
-                ))}
-              </ol>
+              <p className="text-sm text-palette-slate">No instructions in database.</p>
             </CardContent>
           </Card>
         </div>
