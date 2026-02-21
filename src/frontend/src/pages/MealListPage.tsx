@@ -180,7 +180,7 @@ export function MealListPage() {
                   type="number"
                   min={1}
                   value={newMealServings}
-                  onChange={(e) => setNewMealServings(Number(e.target.value) || 4)}
+                  onChange={(e) => setNewMealServings(Number(e.target.value))}
                 />
               </div>
               <div>
@@ -196,7 +196,7 @@ export function MealListPage() {
                             min={0}
                             step="any"
                             value={sel.quantity}
-                            onChange={(e) => setIngredientQuantity(sel.ingredientId, Number(e.target.value) || 0)}
+                            onChange={(e) => setIngredientQuantity(sel.ingredientId, Number(e.target.value))}
                             className="w-20 h-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           <span className="text-palette-slate text-xs w-6">{sel.unit}</span>
