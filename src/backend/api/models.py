@@ -138,11 +138,24 @@ class RecipeIngredient(models.Model):
                 )
 
 
+class RecipeTag(models.Model):
+    name: models.CharField[str, str] = models.CharField(max_length=50)
+
+    if TYPE_CHECKING:
+        recipes: "models.ManyToManyField[Recipe, Recipe]"
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Recipe(models.Model):
     name: models.CharField[str, str] = models.CharField(max_length=100)
     ingredients = models.ManyToManyField(Ingredient, through=RecipeIngredient)
     servings: models.IntegerField[int, int] = models.IntegerField(
         default=1, help_text=_("Number of servings this recipe makes")
+    )
+    tags: models.ManyToManyField[RecipeTag, RecipeTag] = models.ManyToManyField(
+        RecipeTag, blank=True, related_name="recipes"
     )
 
     if TYPE_CHECKING:

@@ -78,6 +78,15 @@ class RecipeIngredientInline(
     extra = 1
 
 
+@register(models.RecipeTag)
+class RecipeTagAdmin(admin.ModelAdmin[models.RecipeTag]):
+    list_display = ("name", "on_recipes_count")
+
+    @admin.display(description="Number of Recipes")
+    def on_recipes_count(self, obj: models.RecipeTag) -> int:
+        return obj.recipes.count()
+
+
 @register(models.Recipe)
 class RecipeAdmin(admin.ModelAdmin[models.Recipe]):
     list_display = ("name", "ingredients_list")
