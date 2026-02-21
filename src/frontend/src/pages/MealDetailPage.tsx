@@ -250,6 +250,7 @@ export function MealDetailPage() {
                   ))}
                 </ol>
               ) : (
+                // TODO a click to edit instructions
                 <p className="text-sm text-palette-slate">No instructions in database.</p>
               )}
             </CardContent>
