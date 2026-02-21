@@ -45,7 +45,7 @@ export function MealListPage() {
         <p className="text-palette-slate">Browse and search your meal collection</p>
       </div>
 
-      <div className="mb-6 space-y-4">
+      <div className="mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-palette-slate" />
           <Input
