@@ -1,20 +1,45 @@
 import { useState, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { calculateRecipeNutrition, calculateRecipeCost } from '../utils/calculations';
-import { Search, DollarSign, Flame } from 'lucide-react';
+import { Search, DollarSign, Flame, Plus } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { RecipeCard } from '../components/recipecard';
-import { useRecipesList, useTagsList } from '../api/mealmodeAPI';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
+import { useRecipesList, useTagsList, useRecipesCreate } from '../api/mealmodeAPI';
+import { getRecipesListQueryKey } from '../api/mealmodeAPI';
 import type { Tag } from '../api/mealmodeAPI';
 
 export function MealListPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: recipeData, isError: recipeIsError, isLoading: recipeIsLoading } = useRecipesList();
-  const { data: tagData, isError: tagIsError, isLoading: tagIsLoading } = useTagsList();
+  const { data: tagData } = useTagsList();
+  const createRecipe = useRecipesCreate({
+    mutation: {
+      onSuccess: (response) => {
+        queryClient.invalidateQueries({ queryKey: getRecipesListQueryKey() });
+        const res = response as { data?: { id?: number } };
+        const id = res?.data?.id ?? (res as { id?: number })?.id;
+        if (id != null) navigate(`/meal/${id}`);
+      },
+    },
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [maxCost, setMaxCost] = useState<number | null>(null);
   const [maxCalories, setMaxCalories] = useState<number | null>(null);
+  const [addMealOpen, setAddMealOpen] = useState(false);
+  const [newMealName, setNewMealName] = useState('');
+  const [newMealServings, setNewMealServings] = useState(4);
 
   const filteredMeals = useMemo(() => {
     return recipeData?.data.results.filter((recipe) => {
@@ -38,11 +63,71 @@ export function MealListPage() {
     );
   };
 
+  const handleAddMeal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMealName.trim()) return;
+    createRecipe.mutate({
+      data: {
+        name: newMealName.trim(),
+        servings: newMealServings,
+      },
+    });
+    setNewMealName('');
+    setNewMealServings(4);
+    setAddMealOpen(false);
+  };
+
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-palette-taupe mb-2">Meals</h2>
-        <p className="text-palette-slate">Browse and search your meal collection</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-palette-taupe mb-2">Meals</h2>
+          <p className="text-palette-slate">Browse and search your meal collection</p>
+        </div>
+        <Dialog open={addMealOpen} onOpenChange={setAddMealOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add meal
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add meal</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddMeal} className="space-y-4 mt-2">
+              <div>
+                <label className="block text-sm font-medium text-palette-slate mb-1">Name</label>
+                <Input
+                  value={newMealName}
+                  onChange={(e) => setNewMealName(e.target.value)}
+                  placeholder="e.g. Greek salad"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-palette-slate mb-1">Servings</label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={newMealServings}
+                  onChange={(e) => setNewMealServings(Number(e.target.value) || 4)}
+                />
+              </div>
+              {createRecipe.isError && (
+                <p className="text-sm text-red-600">Failed to create meal. Try again.</p>
+              )}
+              <div className="flex gap-2 justify-end">
+                <Button type="button" variant="outline" onClick={() => setAddMealOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createRecipe.isPending}>
+                  {createRecipe.isPending ? 'Creating…' : 'Create'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="mb-6">
