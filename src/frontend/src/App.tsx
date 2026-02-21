@@ -16,9 +16,9 @@ function Layout() {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `flex items-center gap-2 text-sm font-medium ${isActive ? 'text-palette-terracotta' : 'text-palette-slate hover:text-palette-taupe'}`
+                `flex items-center gap-2 text-sm font-medium ${isActive ? 'text-palette-terracotta' : 'text-palette-slate hover:text-palette-mist'}`
               }
-            >
+            > 
               <UtensilsCrossed className="w-5 h-5" />
               Meals
             </NavLink>

@@ -1,7 +1,4 @@
-import { useState } from 'react';
-import { useDrag, useDrop, DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useRecipesList } from '../api/mealmodeAPI';
 import type { Recipe } from '../api/mealmodeAPI';
@@ -20,60 +17,64 @@ import {
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const SLOTS = ['breakfast', 'lunch', 'dinner'];
 
-const DragTypes = { MEAL: 'meal' };
-
 interface MealCardProps {
   mealId: string;
   mealName: string;
   servings: number;
+  selected: boolean;
+  onSelect: () => void;
 }
 
-function DraggableMeal({ mealId, mealName, servings }: MealCardProps) {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: DragTypes.MEAL,
-    item: { mealId, mealName, servings },
-    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
-  }));
-
+function SelectableMeal({ mealName, servings, selected, onSelect }: MealCardProps) {
   return (
-    <div
-      ref={drag}
-      className={`p-2 bg-palette-cream border border-palette-terracotta rounded text-xs cursor-move ${
-        isDragging ? 'opacity-50' : ''
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`w-full p-2 rounded text-xs text-left transition-colors ${
+        selected
+          ? 'bg-palette-terracotta/20 border-2 border-palette-terracotta ring-2 ring-palette-terracotta/30'
+          : 'bg-palette-cream border border-palette-terracotta hover:bg-palette-terracotta/10'
       }`}
     >
       <div className="font-semibold truncate">{mealName}</div>
       <div className="text-palette-slate">{servings} servings</div>
-    </div>
+    </button>
   );
 }
 
-interface DropSlotProps {
+interface PlanSlotProps {
   day: string;
   slot: string;
   planEntry?: { id: string; mealId: string; mealName: string; servings: number };
-  onDrop: (day: string, slot: string, mealId: string) => void;
+  selectedMealId: string | null;
+  onPlace: (day: string, slot: string) => void;
   onRemove: (entryId: string) => void;
   onViewMeal: (mealId: string) => void;
 }
 
-function DropSlot({ day, slot, planEntry, onDrop, onRemove, onViewMeal }: DropSlotProps) {
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: DragTypes.MEAL,
-    drop: (item: { mealId: string }) => onDrop(day, slot, item.mealId),
-    collect: (monitor) => ({ isOver: monitor.isOver() }),
-  }));
+function PlanSlot({ day, slot, planEntry, selectedMealId, onPlace, onRemove, onViewMeal }: PlanSlotProps) {
+  const isEmpty = !planEntry;
+  const canPlace = selectedMealId && isEmpty;
+
+  const handleSlotClick = () => {
+    if (canPlace) {
+      onPlace(day, slot);
+    }
+  };
 
   return (
     <div
-      ref={drop}
-      className={`min-h-20 p-2 border-2 border-dashed rounded transition-colors ${
-        isOver
-          ? 'border-palette-terracotta bg-palette-cream'
+      className={`min-h-20 p-2 border-2 rounded transition-colors ${
+        canPlace
+          ? 'border-palette-terracotta border-dashed bg-palette-cream cursor-pointer hover:bg-palette-terracotta/10'
           : planEntry
           ? 'border-palette-taupe bg-white'
-          : 'border-palette-mist bg-palette-mist'
+          : 'border-dashed border-palette-mist bg-palette-mist'
       }`}
+      onClick = {canPlace ? handleSlotClick: undefined}
+      role = {canPlace ? 'button': undefined}
+      tabIndex = {canPlace ? 0 : undefined}
+      onKeyDown = {canPlace ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSlotClick(); } } : undefined}
     >
       {planEntry ? (
         <div className="relative group">
@@ -86,7 +87,7 @@ function DropSlot({ day, slot, planEntry, onDrop, onRemove, onViewMeal }: DropSl
           </button>
           <div
             className="p-2 bg-white border rounded cursor-pointer hover:bg-palette-mist transition-colors"
-            onClick={() => onViewMeal(planEntry.mealId)}
+            onClick={(e) => { e.stopPropagation(); onViewMeal(planEntry.mealId); }}
           >
             <div className="font-semibold text-sm truncate">{planEntry.mealName}</div>
             <div className="text-xs text-palette-slate">{planEntry.servings} servings</div>
@@ -94,7 +95,7 @@ function DropSlot({ day, slot, planEntry, onDrop, onRemove, onViewMeal }: DropSl
         </div>
       ) : (
         <div className="h-full flex items-center justify-center text-palette-slate text-xs">
-          Drag meal here
+          {selectedMealId ? 'Click to add meal' : '—'}
         </div>
       )}
     </div>
@@ -104,7 +105,7 @@ function DropSlot({ day, slot, planEntry, onDrop, onRemove, onViewMeal }: DropSl
 function MealPlanContent() {
   const navigate = useNavigate();
   const { mealPlan, addMealToPlan, removeMealFromPlan } = useApp();
-  const {data: recipeData, isLoading} = useRecipesList();
+  const { data: recipeData, isLoading } = useRecipesList();
   const recipes = useMemo((): Recipe[] => {
     const body =
       recipeData && typeof recipeData === 'object' && 'data' in recipeData
@@ -113,12 +114,15 @@ function MealPlanContent() {
     return Array.isArray(body) ? body : [];
   }, [recipeData]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const handleDrop = (day: string, slot: string, mealId: string) => {
+  const [selectedMealId, setSelectedMealId] = useState<string | null>(null);
+  
+  const handlePlace = (day: string, slot: string) => {
+    if (!selectedMealId) return;
     const existingEntry = mealPlan.find((entry) => entry.day === day && entry.slot === slot);
     if (existingEntry) removeMealFromPlan(existingEntry.id);
-    const recipe = recipes.find((r) => String(r.id) === mealId);
-    if (recipe) addMealToPlan({ mealId, day, slot, servings: recipe.servings ?? 1 });
+    const recipe = recipes.find((r) => String(r.id) === selectedMealId);
+    if (recipe) addMealToPlan({ mealId: selectedMealId, day, slot, servings: recipe.servings ?? 1 });
+    setSelectedMealId(null);
   };
 
   const handleRemove = (entryId: string) => removeMealFromPlan(entryId);
@@ -137,7 +141,7 @@ function MealPlanContent() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-palette-taupe mb-2">Meal Plan</h2>
-          <p className="text-palette-slate">Drag meals into your weekly schedule</p>
+          <p className="text-palette-slate">Click a meal, then click a slot to add it to your plan</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -148,20 +152,22 @@ function MealPlanContent() {
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Drag Meals to Your Plan</DialogTitle>
+              <DialogTitle>Pick a Meal for Your Plan</DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
               {isLoading ? (
                 <p className="text-palette-slate col-span-2">Loading meals…</p>
               ) : (
                 recipes.map((recipe) => (
-                <DraggableMeal
-                  key={recipe.id}
-                  mealId={String(recipe.id)}
-                  mealName={recipe.name}
-                  servings={recipe.servings ?? 1}
-                />
-              ))
+                  <SelectableMeal
+                    key={recipe.id}
+                    mealId={String(recipe.id)}
+                    mealName={recipe.name}
+                    servings={recipe.servings ?? 1}
+                    selected={selectedMealId === String(recipe.id)}
+                    onSelect={() => setSelectedMealId((id) => (id === String(recipe.id) ? null : String(recipe.id)))}
+                  />
+                ))
               )}
             </div>
           </DialogContent>
@@ -190,12 +196,13 @@ function MealPlanContent() {
                       (entry) => entry.day === day && entry.slot === slot
                     );
                     return (
-                      <DropSlot
+                      <PlanSlot
                         key={`${day}-${slot}`}
                         day={day}
                         slot={slot}
                         planEntry={planEntry}
-                        onDrop={handleDrop}
+                        selectedMealId={selectedMealId}
+                        onPlace={handlePlace}
                         onRemove={handleRemove}
                         onViewMeal={handleViewMeal}
                       />
@@ -218,13 +225,15 @@ function MealPlanContent() {
               <p className="text-palette-slate">Loading…</p>
             ) : (
               recipes.slice(0, 10).map((recipe) => (
-              <DraggableMeal
-                key={recipe.id}
-                mealId={String(recipe.id)}
-                mealName={recipe.name}
-                servings={recipe.servings ?? 1}
-              />
-            ))
+                <SelectableMeal
+                  key={recipe.id}
+                  mealId={String(recipe.id)}
+                  mealName={recipe.name}
+                  servings={recipe.servings ?? 1}
+                  selected={selectedMealId === String(recipe.id)}
+                  onSelect={() => setSelectedMealId((id) => (id === String(recipe.id) ? null : String(recipe.id)))}
+                />
+              ))
             )}
           </div>
         </CardContent>
@@ -234,9 +243,5 @@ function MealPlanContent() {
 }
 
 export function MealPlanPage() {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <MealPlanContent />
-    </DndProvider>
-  );
+  return <MealPlanContent />;
 }
