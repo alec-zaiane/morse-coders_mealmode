@@ -14,32 +14,9 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table';
+import { calculateRecipeCost, calculateRecipeNutrition } from '../utils/calculations';
 
-function recipeNutrition(
-  recipe: Recipe,
-  servings: number
-): { perServing: { calories: number; protein: number; carbs: number; fat: number }; total: { calories: number; protein: number; carbs: number; fat: number } } {
-  const scale = servings / (recipe.servings ?? 1);
-  let totalCal = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
-  for (const ri of recipe.ingredients_list ?? []) {
-    const stats = ri.ingredient?.nutrition_stats;
-    if (!stats) continue;
-    const q = ri.quantity * scale;
-    totalCal += (stats.kcal_per_unit ?? 0) * q;
-    totalProtein += (stats.protein_grams_per_unit ?? 0) * q;
-    totalCarbs += ((stats.carbohydrate_fiber_grams_per_unit ?? 0) + (stats.carbohydrate_sugar_grams_per_unit ?? 0)) * q;
-    totalFat += (stats.fat_saturated_grams_per_unit ?? 0) * q;
-  }
-  return {
-    perServing: {
-      calories: totalCal / servings,
-      protein: totalProtein / servings,
-      carbs: totalCarbs / servings,
-      fat: totalFat / servings,
-    },
-    total: { calories: totalCal, protein: totalProtein, carbs: totalCarbs, fat: totalFat },
-  };
-}
+import { NutritionLabel } from '../components/nutritionLabel';
 
 export function MealDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -55,6 +32,7 @@ export function MealDetailPage() {
     : (data as Recipe | undefined);
   const baseServings = recipe?.servings ?? 1;
   const [servings, setServings] = useState(baseServings);
+  const [showNutritionLabel, setShowNutritionLabel] = useState(false);
   useEffect(() => {
     if (recipe?.servings != null) setServings(recipe.servings);
   }, [recipe?.servings]);
@@ -69,10 +47,16 @@ export function MealDetailPage() {
     }));
   }, [recipe, servings, baseServings]);
 
-  const nutrition = useMemo(() => {
+  const costData = useMemo(() => {
     if (!recipe) return null;
-    return recipeNutrition(recipe, servings);
-  }, [recipe, servings]);
+    return calculateRecipeCost(recipe);
+  }, [recipe, servings])
+
+  const nutritionData = useMemo(() => {
+    if (!recipe) return null;
+    return calculateRecipeNutrition(recipe);
+  }, [recipe, servings])
+
 
   if (Number.isNaN(numericId) || numericId < 1) {
     return (
@@ -109,11 +93,12 @@ export function MealDetailPage() {
             <h2 className="text-3xl font-semibold text-palette-taupe mb-2">{recipe.name}</h2>
           </div>
           <div className="text-right">
-            <div className="flex items-center gap-2 text-palette-slate text-xl">
-              <DollarSign className="w-6 h-6" />
-              <span>—/serving</span>
-            </div>
-            <div className="text-sm text-palette-taupe mt-1">Cost not in database</div>
+            {costData && (
+              <div className="flex items-center gap-2 text-palette-slate text-xl">
+                <DollarSign className="w-6 h-6" />
+                <span>{costData.costPerServing.toFixed(2)}/serving{costData.costPartiallyUnknown && "?"}</span >
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -198,46 +183,55 @@ export function MealDetailPage() {
         </div>
 
         <div className="space-y-6">
-          {nutrition && (
+          {nutritionData && (
             <Card>
-              <CardHeader>
-                <CardTitle>Nutrition</CardTitle>
+              <CardHeader onClick={() => setShowNutritionLabel(!showNutritionLabel)}>
+                <div className="flex items-center gap-2 cursor-pointer justify-content">
+                  <CardTitle>Nutrition</CardTitle>
+                  <Button variant="outline" size="sm" className="ml-auto">
+                    {showNutritionLabel ? 'Summary' : 'Label'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="text-center py-4 bg-palette-cream rounded-lg">
-                    <div className="text-3xl font-semibold text-palette-terracotta">
-                      {Math.round(nutrition.perServing.calories)}
-                    </div>
-                    <div className="text-sm text-palette-slate">Calories per serving</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 pt-4 border-t border-palette-mist">
-                    <div className="text-center">
-                      <div className="text-lg font-semibold text-palette-slate">
-                        {Math.round(nutrition.perServing.protein)}g
+                {showNutritionLabel ? (
+                  <NutritionLabel nutritionStats={nutritionData.nutritionPerServing} per_unit="Serving" />
+                ) :
+                  <div className="space-y-3">
+                    <div className="text-center py-4 bg-palette-cream rounded-lg">
+                      <div className="text-3xl font-semibold text-palette-terracotta">
+                        {Math.round(nutritionData.nutritionPerServing.kcal_per_unit)}
                       </div>
-                      <div className="text-xs text-palette-slate">Protein</div>
+                      <div className="text-sm text-palette-slate">Calories per serving</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-lg font-semibold text-palette-taupe">
-                        {Math.round(nutrition.perServing.carbs)}g
+                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-palette-mist">
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-palette-slate">
+                          {Math.round(nutritionData.nutritionPerServing.protein_grams_per_unit)}g
+                        </div>
+                        <div className="text-xs text-palette-slate">Protein</div>
                       </div>
-                      <div className="text-xs text-palette-slate">Carbs</div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-palette-taupe">
+                          {Math.round(nutritionData.nutritionPerServing.carbohydrate_sugar_grams_per_unit + nutritionData.nutritionPerServing.carbohydrate_fiber_grams_per_unit)}g
+                        </div>
+                        <div className="text-xs text-palette-slate">Carbs</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-palette-terracotta">
+                          {Math.round(nutritionData.nutritionPerServing.fat_saturated_grams_per_unit + nutritionData.nutritionPerServing.fat_trans_grams_per_unit)}g
+                        </div>
+                        <div className="text-xs text-palette-slate">Fat</div>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-lg font-semibold text-palette-terracotta">
-                        {Math.round(nutrition.perServing.fat)}g
+                    <div className="pt-3 border-t border-palette-mist text-xs text-palette-taupe">
+                      <div className="flex justify-between">
+                        <span>Total for {servings} servings:</span>
+                        <span>{Math.round(nutritionData.nutritionPerServing.kcal_per_unit * servings)} cal</span>
                       </div>
-                      <div className="text-xs text-palette-slate">Fat</div>
                     </div>
                   </div>
-                  <div className="pt-3 border-t border-palette-mist text-xs text-palette-taupe">
-                    <div className="flex justify-between">
-                      <span>Total for {servings} servings:</span>
-                      <span>{Math.round(nutrition.total.calories)} cal</span>
-                    </div>
-                  </div>
-                </div>
+                }
               </CardContent>
             </Card>
           )}
@@ -247,7 +241,17 @@ export function MealDetailPage() {
               <CardTitle>Cooking Instructions</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-palette-slate">No instructions in database.</p>
+              {recipe.steps.length ? (
+                <ol className="list-decimal list-inside space-y-2">
+                  {recipe.steps.map((step, index) => (
+                    <li key={index} className="text-sm text-palette-slate">
+                      {step.description}
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="text-sm text-palette-slate">No instructions in database.</p>
+              )}
             </CardContent>
           </Card>
         </div>
