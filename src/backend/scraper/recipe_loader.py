@@ -8,6 +8,7 @@ import re
 from typing import Any, Optional, cast
 from api import models as api_models
 from django.db import transaction
+from enum import Enum
 
 
 class StageOne:
@@ -223,6 +224,44 @@ class StageTwo:
         cook_time_minutes: Optional[int]
         description: Optional[str]
 
+    class CommonUnit(Enum):
+        GRAM = ("g", "gram", "grams")
+        KILOGRAM = ("kg", "kilogram", "kilograms")
+        MILLILITER = ("ml", "milliliter", "milliliters")
+        LITER = ("l", "liter", "liters")
+        TEASPOON = ("tsp", "teaspoon", "teaspoons")
+        TABLESPOON = ("tbsp", "tablespoon", "tablespoons")
+        CUP = ("cup", "cups")
+        PIECE = ("piece", "pieces", "pc", "pcs")
+
+    @staticmethod
+    def convert_unit_to_kg(quantity: float, unit: StageTwo.CommonUnit) -> float:
+        """Dirty approximate conversion from various common units to kg
+        input: quantity in the given unit, and the unit (e.g., gram, liter, teaspoon, etc.)
+        output: quantity converted to kg (assuming the density of water for volume units, and completely guessing for pieces/counts)
+        """
+        match unit:
+            case StageTwo.CommonUnit.GRAM:
+                return quantity / 1000
+            case StageTwo.CommonUnit.KILOGRAM:
+                return quantity
+            case StageTwo.CommonUnit.MILLILITER:
+                return quantity / 1000  # assume density of water, quick and dirty
+            case StageTwo.CommonUnit.LITER:
+                return quantity  # assume density of water, quick and dirty
+            case StageTwo.CommonUnit.TEASPOON:
+                return quantity * 0.00492892
+            case StageTwo.CommonUnit.TABLESPOON:
+                return quantity * 0.0147868
+            case StageTwo.CommonUnit.CUP:
+                return quantity * 0.24
+            case StageTwo.CommonUnit.PIECE:
+                return (
+                    quantity * 0.1
+                )  # just a complete guess, since we have no idea, pieces are maybe 100g?
+            case _:
+                raise ValueError(f"Unrecognized unit: {unit}")
+
     @staticmethod
     def parse_quantity(source_text: str) -> float:
         text = source_text.strip()
@@ -247,6 +286,23 @@ class StageTwo:
             return float(decimal_match.group(1))
 
         return 0.0
+
+    @staticmethod
+    def parse_quantity_convert_unit_to_kg(source_text: str) -> float:
+        quantity = StageTwo.parse_quantity(source_text)
+        # match any found units
+        found_units = [
+            unit
+            for unit in StageTwo.CommonUnit
+            if any(alias in source_text.lower() for alias in unit.value)
+        ]
+        if found_units:
+            # take the first :)
+            return StageTwo.convert_unit_to_kg(quantity, found_units[0])
+        else:
+            return StageTwo.convert_unit_to_kg(
+                quantity, StageTwo.CommonUnit.PIECE
+            )  # if there are no units, it's probably count
 
     @staticmethod
     def strip_leading_quantity(source_text: str) -> str:
@@ -296,7 +352,7 @@ class StageTwo:
     @staticmethod
     def match_ingredient(ingredient_str: str) -> StageTwo.IngredientMatch:
         source_text = ingredient_str.strip()
-        quantity = StageTwo.parse_quantity(source_text)
+        quantity = StageTwo.parse_quantity_convert_unit_to_kg(source_text)
         normalized_source = StageTwo.strip_leading_quantity(source_text)
         candidate = normalized_source.lower()
         if not candidate:
