@@ -108,7 +108,7 @@ function CostForm({
     const qty = Number.parseFloat(newSourceQuantity) || 1;
     const doCreate = (scraperId: number) => {
       createSource.mutate({
-        data: { scraper: scraperId, url: newSourceUrl.trim(), quantity: qty, quantity_unit: newSourceUnit },
+        data: { scraper: scraperId, url: newSourceUrl.trim().split('?')[0], quantity: qty, quantity_unit: newSourceUnit },
       });
     };
     if (ingredient.scraper?.id != null) {
