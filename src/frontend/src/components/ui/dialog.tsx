@@ -78,7 +78,7 @@ export function DialogContent({
       />
       <div
         role="dialog"
-        className={`fixed inset-x-0 bottom-0 top-auto z-[100] max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl border border-palette-border/60 bg-white p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-glass transition-all sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:overflow-visible sm:rounded-3xl sm:p-8 ${className}`}
+        className={`fixed inset-x-0 bottom-0 top-auto z-[100] max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl border border-palette-border/60 bg-white p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-glass transition-all sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:overflow-y-auto sm:rounded-3xl sm:p-8 ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
