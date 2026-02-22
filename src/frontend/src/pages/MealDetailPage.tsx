@@ -671,7 +671,7 @@ export function MealDetailPage() {
                     </div>
                     <div className="pt-3 border-t border-palette-border text-xs text-palette-text">
                       <div className="flex justify-between">
-                        <span>Total for {servings} servings:</span>
+                        <span>Total for {servings} serving{servings === 1 ? '' : 's'}:</span>
                         <span>{Math.round(nutritionData.nutritionPerServing.kcal_per_unit * servings)} cal</span>
                       </div>
                     </div>

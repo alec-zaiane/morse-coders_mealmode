@@ -190,7 +190,7 @@ function CostForm({
   };
 
   return (
-    <Card className="h-full p-4 space-y-4">
+    <Card className="h-full min-h-[24rem] md:min-h-[28rem] p-4 space-y-4">
       <h3 className="font-semibold">Cost</h3>
 
       {/* Best scraped price */}
@@ -231,7 +231,7 @@ function CostForm({
 
       {/* Estimated cost */}
       <div className="flex items-center gap-2">
-        <label className="w-36 text-sm shrink-0">Estimated cost</label>
+        <label className="w-36 text-sm text-palette-textMuted font-medium shrink-0">Estimated cost</label>
         {editingCost ? (
           <div className="flex items-center gap-2 flex-1">
             <Input
@@ -328,7 +328,7 @@ function CostForm({
         {sources.length === 0 ? (
           <p className="text-sm text-palette-textMuted">No sources added yet.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2 max-h-96 overflow-y-auto pr-1">
             {sources.map((src) => (
               <li
                 key={src.id}
@@ -441,7 +441,7 @@ function OnHandForm({
   function field(label: string, key: keyof OnHandFormValues, unit?: string) {
     return (
       <div className="flex items-center gap-2">
-        <label className="w-36 text-sm shrink-0">{label}</label>
+        <label className="w-36 text-sm text-palette-textMuted font-medium shrink-0">{label}</label>
         {editing ? (
           <div className="flex items-center gap-2 flex-1">
             <Input
@@ -451,7 +451,7 @@ function OnHandForm({
               onChange={e => setValues(v => ({ ...v, [key]: e.target.value }))}
               className="flex-1"
             />
-            <div>{unit}</div>
+            <div className="w-8 shrink-0 text-sm text-palette-textMuted">{unit}</div>
           </div>
         ) : (
           <span className="text-sm font-medium">{values[key] === '' ? '—' : `${values[key]}${unit ?? ''}`}</span>
@@ -461,7 +461,7 @@ function OnHandForm({
   }
 
   return (
-    <Card className="h-full p-4 space-y-4">
+    <Card className="p-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold flex items-center gap-2">
           <Refrigerator className="w-4 h-4" /> On-Hand
@@ -470,24 +470,29 @@ function OnHandForm({
           <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Edit</Button>
         )}
       </div>
-      {field('Quantity on hand', 'quantity', ingredient.nutrition_stats?.base_unit)}
-      {field('Desired quantity', 'desired_quantity', ingredient.nutrition_stats?.base_unit)}
-      {field('Warning below', 'warning_quantity', ingredient.nutrition_stats?.base_unit)}
-      <div className="flex items-center gap-2">
-        <label htmlFor="on-hand-notes" className="w-36 text-sm shrink-0">Notes</label>
-        {editing ? (
-          <Input
-            id="on-hand-notes"
-            value={values.notes}
-            onChange={e => setValues(v => ({ ...v, notes: e.target.value }))}
-            className="flex-1"
-          />
-        ) : (
-          <span className="text-sm font-medium">{values.notes || '—'}</span>
-        )}
+      <div className="space-y-3">
+        {field('Quantity on hand', 'quantity', ingredient.nutrition_stats?.base_unit)}
+        {field('Desired quantity', 'desired_quantity', ingredient.nutrition_stats?.base_unit)}
+        {field('Warning below', 'warning_quantity', ingredient.nutrition_stats?.base_unit)}
+        <div className="flex items-center gap-2">
+          <label htmlFor="on-hand-notes" className="w-36 text-sm text-palette-textMuted font-medium shrink-0">Notes</label>
+          {editing ? (
+            <div className="flex items-center gap-2 flex-1">
+              <Input
+                id="on-hand-notes"
+                value={values.notes}
+                onChange={e => setValues(v => ({ ...v, notes: e.target.value }))}
+                className="flex-1"
+              />
+              <div className="w-8 shrink-0"></div>
+            </div>
+          ) : (
+            <span className="text-sm font-medium">{values.notes || '—'}</span>
+          )}
+        </div>
       </div>
       {editing && (
-        <div className="flex gap-2 pt-1">
+        <div className="flex gap-2 pt-2">
           <Button size="sm" onClick={handleSave} disabled={isPending}>
             {isPending ? 'Saving…' : 'Save'}
           </Button>
@@ -573,43 +578,39 @@ export function IngredientPage() {
       />
       <h2 className="text-2xl font-semibold text-palette-text">{ingredient.name}</h2>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-        <div className="h-full">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 items-start">
+        <div className="flex flex-col gap-4 md:gap-6">
           <OnHandForm
             ingredient={ingredient}
             ingredientId={numericId}
             existing={ingredient.on_hand}
             onSaved={invalidateIngredient}
           />
+          <Card className="p-4">
+            <h3 className="font-semibold text-lg mb-3">Used in recipes</h3>
+            {usedInRecipes.length === 0 ? (
+              <p className="text-sm text-palette-textMuted">Not used in any recipes.</p>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                {usedInRecipes.map(recipe => (
+                  <RecipeCard key={recipe.id} recipe={recipe} compact />
+                ))}
+              </div>
+            )}
+          </Card>
         </div>
 
-        <div className="h-full">
+        <div className="flex flex-col gap-4 md:gap-6">
           {aggregatedStats ? (
-            <Card className="h-full p-4">
+            <Card className="p-4">
               <NutritionLabel nutritionStats={aggregatedStats} per_unit={unit} />
             </Card>
           ) : (
-            <Card className="h-full p-4">
+            <Card className="p-4">
               <h3 className="font-semibold text-lg mb-3">Nutrition Facts</h3>
               <p className="text-sm text-palette-textMuted">No nutrition data available.</p>
             </Card>
           )}
-        </div>
-
-        <Card className="h-full p-4">
-          <h3 className="font-semibold text-lg mb-3">Used in recipes</h3>
-          {usedInRecipes.length === 0 ? (
-            <p className="text-sm text-palette-textMuted">Not used in any recipes.</p>
-          ) : (
-            <div className="space-y-3">
-              {usedInRecipes.map(recipe => (
-                <RecipeCard key={recipe.id} recipe={recipe} compact />
-              ))}
-            </div>
-          )}
-        </Card>
-
-        <div className="h-full">
           <CostForm
             ingredient={ingredient}
             ingredientId={numericId}
