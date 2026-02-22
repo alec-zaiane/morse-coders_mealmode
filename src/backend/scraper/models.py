@@ -13,10 +13,14 @@ if TYPE_CHECKING:
 class Scraper(models.Model):
     cached_source: models.ForeignKey["Optional[Source]", "Optional[Source]"] = (
         models.ForeignKey(
-            "Source", on_delete=models.SET_NULL, null=True, related_name="best_for"
+            "Source",
+            on_delete=models.SET_NULL,
+            null=True,
+            related_name="best_for",
+            blank=True,
         )
     )
-    cached_price: "NullableFloatField" = models.FloatField(null=True)
+    cached_price: "NullableFloatField" = models.FloatField(null=True, blank=True)
     updated_at: models.DateTimeField[datetime, datetime] = models.DateTimeField(
         auto_now=True
     )
@@ -62,7 +66,7 @@ class Source(models.Model):
     updated_at: models.DateTimeField[datetime, datetime] = models.DateTimeField(
         auto_now=True
     )
-    cached_price: "NullableFloatField" = models.FloatField(null=True)
+    cached_price: "NullableFloatField" = models.FloatField(null=True, blank=True)
     quantity_unit: models.CharField[IngredientUnit, IngredientUnit] = models.CharField(
         max_length=4,
         choices=IngredientUnit.choices,
