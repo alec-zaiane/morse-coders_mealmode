@@ -230,9 +230,10 @@ class StageTwo:
         MILLILITER = ("ml", "milliliter", "milliliters")
         LITER = ("l", "liter", "liters")
         TEASPOON = ("tsp", "teaspoon", "teaspoons")
-        TABLESPOON = ("tbsp", "tablespoon", "tablespoons")
+        TABLESPOON = ("tbsp ", "tablespoon", "tablespoons")
         CUP = ("cup", "cups")
         PIECE = ("piece", "pieces", "pc", "pcs")
+        POUND = ("lb", "pound", "pounds")
 
     @staticmethod
     def convert_unit_to_kg(quantity: float, unit: StageTwo.CommonUnit) -> float:
@@ -259,6 +260,8 @@ class StageTwo:
                 return (
                     quantity * 0.1
                 )  # just a complete guess, since we have no idea, pieces are maybe 100g?
+            case StageTwo.CommonUnit.POUND:
+                return quantity * 0.453592
             case _:
                 raise ValueError(f"Unrecognized unit: {unit}")
 
@@ -288,18 +291,35 @@ class StageTwo:
         return 0.0
 
     @staticmethod
+    def find_units_with_context(source_text: str) -> Optional[StageTwo.CommonUnit]:
+        """Finds units that fit the following criteria:
+        1) They are in the source text
+        2) The preceding text contains either a quantity or is a space (avoids matching the 'l' in 'flour' as a liter unit for example)
+        3) The following text is either a space, the end of the string, or a common punctuation mark (avoids matching the 'g' in 'egg' for example)
+        """
+        for unit in StageTwo.CommonUnit:
+            for alias in unit.value:
+                pattern = rf"(?<=\d|\s){re.escape(alias)}(?=\s|[.,;:!?()\[\]{{}}]|$)"
+                if re.search(pattern, source_text, re.IGNORECASE):
+                    return unit
+        return None
+
+    @staticmethod
     def parse_quantity_convert_unit_to_kg(source_text: str) -> float:
+        print(f"Parsing quantity and unit from source text: '{source_text}'")
         quantity = StageTwo.parse_quantity(source_text)
+        print(f"\tParsed quantity: {quantity}")
         # match any found units
-        found_units = [
-            unit
-            for unit in StageTwo.CommonUnit
-            if any(alias in source_text.lower() for alias in unit.value)
-        ]
-        if found_units:
+        found_unit = StageTwo.find_units_with_context(source_text)
+        print(f"\tFound unit: {found_unit}")
+        if found_unit:
+            print(f"\tConverting quantity to kg using unit: {found_unit}")
             # take the first :)
-            return StageTwo.convert_unit_to_kg(quantity, found_units[0])
+            return StageTwo.convert_unit_to_kg(quantity, found_unit)
         else:
+            print(
+                "\tNo units found, treating as pieces and converting to kg with a guess"
+            )
             return StageTwo.convert_unit_to_kg(
                 quantity, StageTwo.CommonUnit.PIECE
             )  # if there are no units, it's probably count
