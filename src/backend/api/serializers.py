@@ -122,3 +122,13 @@ class RecipeSerializer(serializers.ModelSerializer[models.Recipe]):
                     description=item["description"],
                 )
         return instance
+
+
+class MealPlanEntrySerializer(serializers.ModelSerializer[models.MealPlanEntry]):
+    recipe = serializers.PrimaryKeyRelatedField(
+        queryset=models.Recipe.objects.all()
+    )
+
+    class Meta:  # type: ignore
+        model = models.MealPlanEntry
+        fields = ("id", "recipe", "day", "slot", "servings")

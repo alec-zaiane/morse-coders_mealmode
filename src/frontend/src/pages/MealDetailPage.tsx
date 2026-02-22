@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRecipesRetrieve, useRecipesPartialUpdate, useIngredientsList, getRecipesRetrieveQueryKey, getRecipesListQueryKey } from '../api/mealmodeAPI';
 import type { Recipe, RecipeIngredient } from '../api/mealmodeAPI';
 import type { Ingredient } from '../api/mealmodeAPI';
-import { ArrowLeft, Users, DollarSign, Pencil, Plus, X, ChevronDown } from 'lucide-react';
+import { Users, DollarSign, Pencil, Plus, X, ChevronDown } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -25,6 +25,7 @@ import {
 import { calculateRecipeCost, calculateRecipeNutrition } from '../utils/calculations';
 
 import { NutritionLabel } from '../components/nutritionLabel';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 function ingredientUnitLabel(ing: Ingredient): string {
   const u = ing.nutrition_stats?.base_unit;
@@ -172,9 +173,11 @@ export function MealDetailPage() {
 
   if (Number.isNaN(numericId) || numericId < 1) {
     return (
-      <div className="text-center py-12">
-        <p className="text-palette-taupe">Invalid recipe</p>
-        <Button onClick={() => navigate('/')} className="mt-4">Back to Meals</Button>
+      <div className="space-y-4">
+        <Breadcrumbs items={[{ label: 'Meals', href: '/' }]} />
+        <div className="text-center py-12">
+          <p className="text-palette-taupe">Invalid recipe</p>
+        </div>
       </div>
     );
   }
@@ -185,9 +188,11 @@ export function MealDetailPage() {
 
   if (isError || !recipe) {
     return (
-      <div className="text-center py-12">
-        <p className="text-palette-taupe">Meal not found</p>
-        <Button onClick={() => navigate('/')} className="mt-4">Back to Meals</Button>
+      <div className="space-y-4">
+        <Breadcrumbs items={[{ label: 'Meals', href: '/' }]} />
+        <div className="text-center py-12">
+          <p className="text-palette-taupe">Meal not found</p>
+        </div>
       </div>
     );
   }
@@ -195,11 +200,12 @@ export function MealDetailPage() {
   return (
     <div>
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate('/')} className="mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Meals
-        </Button>
-
+        <Breadcrumbs
+          items={[
+            { label: 'Meals', href: '/' },
+            { label: recipe.name },
+          ]}
+        />
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-3xl font-semibold text-palette-taupe mb-2">{recipe.name}</h2>

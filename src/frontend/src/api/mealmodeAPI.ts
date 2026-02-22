@@ -91,6 +91,26 @@ export interface Ingredient {
   readonly on_hand: IngredientOnHand;
 }
 
+export interface MealPlanEntry {
+  readonly id: number;
+  recipe: number;
+  /**
+   * Day of the week, e.g. monday, tuesday
+   * @maxLength 20
+   */
+  day: string;
+  /**
+   * Meal slot, e.g. breakfast, lunch, dinner
+   * @maxLength 20
+   */
+  slot: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  servings?: number;
+}
+
 export interface NutritionStats {
   readonly id: number;
   /** The base unit for the nutrition stats (e.g., per kg, per liter, etc.)
@@ -202,6 +222,15 @@ export interface PaginatedIngredientList {
   /** @nullable */
   previous?: string | null;
   results: Ingredient[];
+}
+
+export interface PaginatedMealPlanEntryList {
+  count: number;
+  /** @nullable */
+  next?: string | null;
+  /** @nullable */
+  previous?: string | null;
+  results: MealPlanEntry[];
 }
 
 export interface PaginatedOnHandIngredientList {
@@ -405,6 +434,17 @@ on_hand__isnull?: boolean;
  * A search term.
  */
 search?: string;
+};
+
+export type MealPlanEntriesListParams = {
+/**
+ * Number of results to return per page.
+ */
+limit?: number;
+/**
+ * The initial index from which to return the results.
+ */
+offset?: number;
 };
 
 export type RecipesListParams = {
@@ -1215,6 +1255,287 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       > => {
 
       const mutationOptions = getIngredientsDestroyMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const mealPlanEntriesList = (
+    params?: MealPlanEntriesListParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PaginatedMealPlanEntryList>> => {
+    
+    
+    return axios.default.get(
+      `http://localhost:8000/api/meal-plan-entries/`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getMealPlanEntriesListQueryKey = (params?: MealPlanEntriesListParams,) => {
+    return [
+    `http://localhost:8000/api/meal-plan-entries/`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getMealPlanEntriesListQueryOptions = <TData = Awaited<ReturnType<typeof mealPlanEntriesList>>, TError = AxiosError<unknown>>(params?: MealPlanEntriesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesList>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getMealPlanEntriesListQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof mealPlanEntriesList>>> = ({ signal }) => mealPlanEntriesList(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MealPlanEntriesListQueryResult = NonNullable<Awaited<ReturnType<typeof mealPlanEntriesList>>>
+export type MealPlanEntriesListQueryError = AxiosError<unknown>
+
+
+export function useMealPlanEntriesList<TData = Awaited<ReturnType<typeof mealPlanEntriesList>>, TError = AxiosError<unknown>>(
+ params: undefined |  MealPlanEntriesListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof mealPlanEntriesList>>,
+          TError,
+          Awaited<ReturnType<typeof mealPlanEntriesList>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMealPlanEntriesList<TData = Awaited<ReturnType<typeof mealPlanEntriesList>>, TError = AxiosError<unknown>>(
+ params?: MealPlanEntriesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof mealPlanEntriesList>>,
+          TError,
+          Awaited<ReturnType<typeof mealPlanEntriesList>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMealPlanEntriesList<TData = Awaited<ReturnType<typeof mealPlanEntriesList>>, TError = AxiosError<unknown>>(
+ params?: MealPlanEntriesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesList>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useMealPlanEntriesList<TData = Awaited<ReturnType<typeof mealPlanEntriesList>>, TError = AxiosError<unknown>>(
+ params?: MealPlanEntriesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesList>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMealPlanEntriesListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+export const mealPlanEntriesCreate = (
+    mealPlanEntry: NonReadonly<MealPlanEntry>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<MealPlanEntry>> => {
+    
+    
+    return axios.default.post(
+      `http://localhost:8000/api/meal-plan-entries/`,
+      mealPlanEntry,options
+    );
+  }
+
+
+
+export const getMealPlanEntriesCreateMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mealPlanEntriesCreate>>, TError,{data: NonReadonly<MealPlanEntry>}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof mealPlanEntriesCreate>>, TError,{data: NonReadonly<MealPlanEntry>}, TContext> => {
+
+const mutationKey = ['mealPlanEntriesCreate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof mealPlanEntriesCreate>>, {data: NonReadonly<MealPlanEntry>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  mealPlanEntriesCreate(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MealPlanEntriesCreateMutationResult = NonNullable<Awaited<ReturnType<typeof mealPlanEntriesCreate>>>
+    export type MealPlanEntriesCreateMutationBody = NonReadonly<MealPlanEntry>
+    export type MealPlanEntriesCreateMutationError = AxiosError<unknown>
+
+    export const useMealPlanEntriesCreate = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mealPlanEntriesCreate>>, TError,{data: NonReadonly<MealPlanEntry>}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof mealPlanEntriesCreate>>,
+        TError,
+        {data: NonReadonly<MealPlanEntry>},
+        TContext
+      > => {
+
+      const mutationOptions = getMealPlanEntriesCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const mealPlanEntriesRetrieve = (
+    id: number, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<MealPlanEntry>> => {
+    
+    
+    return axios.default.get(
+      `http://localhost:8000/api/meal-plan-entries/${id}/`,options
+    );
+  }
+
+
+
+
+export const getMealPlanEntriesRetrieveQueryKey = (id?: number,) => {
+    return [
+    `http://localhost:8000/api/meal-plan-entries/${id}/`
+    ] as const;
+    }
+
+    
+export const getMealPlanEntriesRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError = AxiosError<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getMealPlanEntriesRetrieveQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>> = ({ signal }) => mealPlanEntriesRetrieve(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MealPlanEntriesRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>>
+export type MealPlanEntriesRetrieveQueryError = AxiosError<unknown>
+
+
+export function useMealPlanEntriesRetrieve<TData = Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>,
+          TError,
+          Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMealPlanEntriesRetrieve<TData = Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>,
+          TError,
+          Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMealPlanEntriesRetrieve<TData = Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useMealPlanEntriesRetrieve<TData = Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof mealPlanEntriesRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMealPlanEntriesRetrieveQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+export const mealPlanEntriesDestroy = (
+    id: number, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.default.delete(
+      `http://localhost:8000/api/meal-plan-entries/${id}/`,options
+    );
+  }
+
+
+
+export const getMealPlanEntriesDestroyMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mealPlanEntriesDestroy>>, TError,{id: number}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof mealPlanEntriesDestroy>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['mealPlanEntriesDestroy'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof mealPlanEntriesDestroy>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  mealPlanEntriesDestroy(id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MealPlanEntriesDestroyMutationResult = NonNullable<Awaited<ReturnType<typeof mealPlanEntriesDestroy>>>
+    
+    export type MealPlanEntriesDestroyMutationError = AxiosError<unknown>
+
+    export const useMealPlanEntriesDestroy = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mealPlanEntriesDestroy>>, TError,{id: number}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof mealPlanEntriesDestroy>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+
+      const mutationOptions = getMealPlanEntriesDestroyMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

@@ -105,7 +105,7 @@ function PlanSlot({ day, slot, planEntry, selectedMealId, onPlace, onRemove, onV
 
 function MealPlanContent() {
   const navigate = useNavigate();
-  const { mealPlan, addMealToPlan, removeMealFromPlan } = useApp();
+  const { mealPlan, isLoading: planLoading, addMealToPlan, removeMealFromPlan } = useApp();
   const { data: recipeData, isLoading } = useRecipesList();
   const recipes = useMemo((): Recipe[] => {
     const body =
@@ -198,6 +198,9 @@ function MealPlanContent() {
 
       <Card>
         <CardContent className="p-4">
+          {planLoading ? (
+            <p className="text-palette-slate py-4">Loading plan…</p>
+          ) : (
           <div className="overflow-x-auto">
             <div className="min-w-[800px]">
               <div className="grid grid-cols-8 gap-2 mb-2">
@@ -234,6 +237,7 @@ function MealPlanContent() {
               ))}
             </div>
           </div>
+          )}
         </CardContent>
       </Card>
 

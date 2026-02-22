@@ -1,4 +1,11 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  useMealPlanEntriesList,
+  useMealPlanEntriesCreate,
+  useMealPlanEntriesDestroy,
+  getMealPlanEntriesListQueryKey,
+} from '../api/mealmodeAPI';
 
 export interface MealPlanEntry {
   id: string;
@@ -10,26 +17,67 @@ export interface MealPlanEntry {
 
 interface AppContextValue {
   mealPlan: MealPlanEntry[];
+  isLoading: boolean;
   addMealToPlan: (entry: Omit<MealPlanEntry, 'id'>) => void;
   removeMealFromPlan: (entryId: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+function apiEntryToContext(entry: { id: number; recipe: number; day: string; slot: string; servings?: number }): MealPlanEntry {
+  return {
+    id: String(entry.id),
+    mealId: String(entry.recipe),
+    day: entry.day,
+    slot: entry.slot,
+    servings: entry.servings ?? 1,
+  };
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [mealPlan, setMealPlan] = useState<MealPlanEntry[]>([]);
+  const queryClient = useQueryClient();
+  const { data: listResponse, isLoading } = useMealPlanEntriesList({ limit: 500 });
+  const createEntry = useMealPlanEntriesCreate({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getMealPlanEntriesListQueryKey() });
+      },
+    },
+  });
+  const destroyEntry = useMealPlanEntriesDestroy({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getMealPlanEntriesListQueryKey() });
+      },
+    },
+  });
+
+  const mealPlan: MealPlanEntry[] = useMemo(() => {
+    const results = listResponse?.data?.results;
+    if (!Array.isArray(results)) return [];
+    return results.map(apiEntryToContext);
+  }, [listResponse]);
 
   const value = useMemo<AppContextValue>(
     () => ({
       mealPlan,
+      isLoading,
       addMealToPlan: (entry) => {
-        setMealPlan((prev) => [...prev, { ...entry, id: `plan-${Date.now()}` }]);
+        createEntry.mutate({
+          data: {
+            recipe: Number(entry.mealId),
+            day: entry.day,
+            slot: entry.slot,
+            servings: entry.servings,
+          },
+        });
       },
       removeMealFromPlan: (entryId) => {
-        setMealPlan((prev) => prev.filter((e) => e.id !== entryId));
+        const id = Number(entryId);
+        if (!Number.isNaN(id)) destroyEntry.mutate({ id });
       },
     }),
-    [mealPlan]
+    [mealPlan, isLoading, createEntry, destroyEntry]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

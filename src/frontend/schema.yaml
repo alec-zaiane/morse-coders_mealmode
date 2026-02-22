@@ -329,6 +329,103 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/meal-plan-entries/:
+    get:
+      operationId: meal_plan_entries_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - meal-plan-entries
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMealPlanEntryList'
+          description: ''
+    post:
+      operationId: meal_plan_entries_create
+      tags:
+      - meal-plan-entries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MealPlanEntry'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MealPlanEntry'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MealPlanEntry'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealPlanEntry'
+          description: ''
+  /api/meal-plan-entries/{id}/:
+    get:
+      operationId: meal_plan_entries_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meal plan entry.
+        required: true
+      tags:
+      - meal-plan-entries
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealPlanEntry'
+          description: ''
+    delete:
+      operationId: meal_plan_entries_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meal plan entry.
+        required: true
+      tags:
+      - meal-plan-entries
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
   /api/recipes/:
     get:
       operationId: recipes_list
@@ -686,6 +783,32 @@ components:
       - name
       - nutrition_stats
       - on_hand
+    MealPlanEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        recipe:
+          type: integer
+        day:
+          type: string
+          description: Day of the week, e.g. monday, tuesday
+          maxLength: 20
+        slot:
+          type: string
+          description: Meal slot, e.g. breakfast, lunch, dinner
+          maxLength: 20
+        servings:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+      required:
+      - day
+      - id
+      - recipe
+      - slot
     NutritionStats:
       type: object
       properties:
@@ -830,6 +953,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Ingredient'
+    PaginatedMealPlanEntryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealPlanEntry'
     PaginatedOnHandIngredientList:
       type: object
       required:

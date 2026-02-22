@@ -24,3 +24,9 @@ class RecipeViewSet(viewsets.ModelViewSet[models.Recipe]):
 class TagViewSet(viewsets.ModelViewSet[models.RecipeTag]):
     queryset = models.RecipeTag.objects.all()
     serializer_class = serializers.TagSerializer
+
+
+class MealPlanEntryViewSet(viewsets.ModelViewSet[models.MealPlanEntry]):
+    queryset = models.MealPlanEntry.objects.all()
+    serializer_class = serializers.MealPlanEntrySerializer
+    http_method_names = ["get", "post", "delete", "head", "options"]

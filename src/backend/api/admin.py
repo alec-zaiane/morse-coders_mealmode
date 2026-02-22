@@ -100,3 +100,10 @@ class RecipeAdmin(admin.ModelAdmin[models.Recipe]):
     @admin.display(description="Ingredients")
     def ingredients_list(self, obj: models.Recipe) -> str:
         return ", ".join(str(ri) for ri in obj.ingredients_list.all())
+
+
+@register(models.MealPlanEntry)
+class MealPlanEntryAdmin(admin.ModelAdmin[models.MealPlanEntry]):
+    list_display = ("id", "recipe", "day", "slot", "servings")
+    list_filter = ("day", "slot")
+    search_fields = ("recipe__name",)

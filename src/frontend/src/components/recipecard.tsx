@@ -12,14 +12,15 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
 
     return (<Card
         key={recipe.id}
-        className="hover:shadow-lg transition-shadow cursor-pointer"
+        className="relative overflow-hidden group border-2 border-palette-taupe hover:shadow-xl transition-all hover:scale-[1.02] cursor-pointer h-full hover:bg-palette-lightblue/90"
         onClick={() => navigate(`/meal/${recipe.id}`)}
     >
-        <CardHeader>
-            <CardTitle className="text-lg">{recipe.name}</CardTitle>
+        <div className="absolute top-0 right-0 w-24 h-24 bg-palette-cream/30 rounded-bl-full transform translate-x-12 -translate-y-12 group-hover:translate-x-8 group-hover:-translate-y-8 transition-transform" aria-hidden />
+        <CardHeader className="relative z-10 pb-2">
+            <CardTitle className="text-xl">{recipe.name}</CardTitle>
         </CardHeader>
-        <CardContent>
-            <div className="space-y-3">
+        <CardContent className="relative z-10 pt-0">
+            <div className="space-y-4">
                 <div className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-1 text-palette-slate">
                         <DollarSign className="w-4 h-4" />
