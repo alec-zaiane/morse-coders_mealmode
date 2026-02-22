@@ -43,7 +43,7 @@ class ConfirmableRecipeViewSet(viewsets.ModelViewSet[models.ConfirmableRecipe]):
     ).all()
     serializer_class = serializers.ConfirmableRecipeSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ["source"]
+    filterset_fields = ["source_url"]
 
     @extend_schema(
         summary="Confirm a ConfirmableRecipe, saving it as an actual Recipe",
