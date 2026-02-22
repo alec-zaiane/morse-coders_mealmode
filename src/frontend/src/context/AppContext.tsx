@@ -4,6 +4,7 @@ import {
   useMealPlanEntriesList,
   useMealPlanEntriesCreate,
   useMealPlanEntriesDestroy,
+  useMealPlanEntriesPartialUpdate,
   getMealPlanEntriesListQueryKey,
   type DayEnum,
   type SlotEnum,
@@ -21,6 +22,7 @@ interface AppContextValue {
   mealPlan: MealPlanEntry[];
   isLoading: boolean;
   addMealToPlan: (entry: Omit<MealPlanEntry, 'id'>) => void;
+  updateMealPlanEntry: (entryId: string, data: { servings: number }) => void;
   removeMealFromPlan: (entryId: string) => void;
 }
 
@@ -53,6 +55,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
     },
   });
+  const partialUpdateEntry = useMealPlanEntriesPartialUpdate({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getMealPlanEntriesListQueryKey() });
+      },
+    },
+  });
 
   const mealPlan: MealPlanEntry[] = useMemo(() => {
     const results = listResponse?.data?.results;
@@ -74,12 +83,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
           },
         });
       },
+      updateMealPlanEntry: (entryId, data) => {
+        const id = Number(entryId);
+        if (!Number.isNaN(id) && data.servings >= 1) {
+          partialUpdateEntry.mutate({ id, data: { servings: data.servings } });
+        }
+      },
       removeMealFromPlan: (entryId) => {
         const id = Number(entryId);
         if (!Number.isNaN(id)) destroyEntry.mutate({ id });
       },
     }),
-    [mealPlan, isLoading, createEntry, destroyEntry]
+    [mealPlan, isLoading, createEntry, partialUpdateEntry, destroyEntry]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

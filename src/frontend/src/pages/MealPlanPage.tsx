@@ -51,11 +51,12 @@ interface PlanSlotProps {
   planEntry?: { id: string; mealId: string; mealName: string; servings: number };
   selectedMealId: string | null;
   onPlace: (day: string, slot: string) => void;
+  onUpdateServings: (entryId: string, servings: number) => void;
   onRemoveRequest: (entry: { id: string; mealName: string }) => void;
   onViewMeal: (mealId: string) => void;
 }
 
-function PlanSlot({ day, slot, planEntry, selectedMealId, onPlace, onRemoveRequest, onViewMeal }: PlanSlotProps) {
+function PlanSlot({ day, slot, planEntry, selectedMealId, onPlace, onUpdateServings, onRemoveRequest, onViewMeal }: PlanSlotProps) {
   const isEmpty = !planEntry;
   const canPlace = selectedMealId && isEmpty;
 
@@ -63,6 +64,12 @@ function PlanSlot({ day, slot, planEntry, selectedMealId, onPlace, onRemoveReque
     if (canPlace) {
       onPlace(day, slot);
     }
+  };
+
+  const handleServingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!planEntry) return;
+    const v = parseInt(e.target.value, 10);
+    if (!Number.isNaN(v) && v >= 1) onUpdateServings(planEntry.id, v);
   };
 
   return (
@@ -90,11 +97,23 @@ function PlanSlot({ day, slot, planEntry, selectedMealId, onPlace, onRemoveReque
             <X className="w-3 h-3" />
           </button>
           <div
-            className="p-2 bg-white border rounded cursor-pointer hover:bg-palette-mist transition-colors"
+            className="p-2 bg-white border rounded cursor-pointer hover:bg-palette-mist/40 transition-colors"
             onClick={(e) => { e.stopPropagation(); onViewMeal(planEntry.mealId); }}
           >
             <div className="font-semibold text-sm truncate">{planEntry.mealName}</div>
-            <div className="text-xs text-palette-slate">{planEntry.servings} servings</div>
+            <div className="flex items-center gap-1.5 mt-1 text-xs text-palette-slate" onClick={(e) => e.stopPropagation()}>
+              <label className="sr-only" htmlFor={`servings-${planEntry.id}`}>Servings</label>
+              <input
+                id={`servings-${planEntry.id}`}
+                type="number"
+                min={1}
+                value={planEntry.servings}
+                onChange={handleServingsChange}
+                className="w-11 rounded border border-palette-mist/80 bg-white px-1.5 py-0.5 text-center text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                aria-label="Number of servings"
+              />
+              <span>servings</span>
+            </div>
           </div>
         </div>
       ) : (
@@ -109,7 +128,7 @@ function PlanSlot({ day, slot, planEntry, selectedMealId, onPlace, onRemoveReque
 function MealPlanContent() {
   const navigate = useNavigate();
   const toast = useToast();
-  const { mealPlan, isLoading: planLoading, addMealToPlan, removeMealFromPlan } = useApp();
+  const { mealPlan, isLoading: planLoading, addMealToPlan, updateMealPlanEntry, removeMealFromPlan } = useApp();
   const { data: recipeData, isLoading } = useRecipesList();
   const [confirmRemove, setConfirmRemove] = useState<{ id: string; mealName: string } | null>(null);
   const recipes = useMemo((): Recipe[] => {
@@ -296,6 +315,7 @@ function MealPlanContent() {
                         planEntry={planEntry}
                         selectedMealId={selectedMealId}
                         onPlace={handlePlace}
+                        onUpdateServings={(entryId, servings) => updateMealPlanEntry(entryId, { servings })}
                         onRemoveRequest={handleRemoveRequest}
                         onViewMeal={handleViewMeal}
                       />
@@ -327,11 +347,24 @@ function MealPlanContent() {
                               >
                                 {planEntry.mealName}
                               </button>
-                              <span className="text-xs text-palette-slate shrink-0">{planEntry.servings} servings</span>
+                              <label className="sr-only" htmlFor={`mobile-servings-${planEntry.id}`}>Servings</label>
+                              <input
+                                id={`mobile-servings-${planEntry.id}`}
+                                type="number"
+                                min={1}
+                                value={planEntry.servings}
+                                onChange={(e) => {
+                                  const v = parseInt(e.target.value, 10);
+                                  if (!Number.isNaN(v) && v >= 1) updateMealPlanEntry(planEntry.id, { servings: v });
+                                }}
+                                className="w-11 rounded border border-palette-mist/80 bg-white px-1.5 py-0.5 text-center text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                aria-label="Servings"
+                              />
+                              <span className="text-xs text-palette-slate shrink-0">sv</span>
                               <button
                                 type="button"
                                 onClick={() => handleRemoveRequest({ id: planEntry.id, mealName: planEntry.mealName })}
-                                className="shrink-0 p-1 rounded text-red-600 hover:bg-red-50"
+                                className="shrink-0 p-1 rounded text-palette-slate hover:bg-palette-mist/40"
                                 aria-label="Remove from plan"
                               >
                                 <X className="w-4 h-4" />

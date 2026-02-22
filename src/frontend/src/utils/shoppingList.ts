@@ -41,7 +41,8 @@ export function buildShoppingList(
     const recipe = recipes.find((r) => String(r.id) === entry.mealId);
     if (!recipe?.ingredients_list?.length) continue;
     const recipeServings = recipe.servings ?? 1;
-    const scale = 1 / recipeServings;
+    /** Scale recipe quantities to the number of servings in this plan entry */
+    const scale = entry.servings / recipeServings;
 
     for (const ri of recipe.ingredients_list as RecipeIngredient[]) {
       const ing = ri.ingredient;

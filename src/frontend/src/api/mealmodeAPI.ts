@@ -1685,7 +1685,77 @@ export const mealPlanEntriesDestroy = (
     );
   }
 
+/** Partial update (PATCH) for meal plan entry, e.g. update servings */
+export type PatchedMealPlanEntry = { servings?: number };
 
+export const mealPlanEntriesPartialUpdate = (
+  id: number,
+  data: PatchedMealPlanEntry,
+  options?: AxiosRequestConfig
+): Promise<AxiosResponse<MealPlanEntry>> => {
+  return axios.default.patch(
+    `http://localhost:8000/api/meal-plan-entries/${id}/`,
+    data,
+    options
+  );
+};
+
+export const getMealPlanEntriesPartialUpdateMutationOptions = <
+  TError = AxiosError<unknown>,
+  TContext = unknown
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof mealPlanEntriesPartialUpdate>>,
+      TError,
+      { id: number; data: PatchedMealPlanEntry },
+      TContext
+    >;
+    axios?: AxiosRequestConfig;
+  }
+): UseMutationOptions<
+  Awaited<ReturnType<typeof mealPlanEntriesPartialUpdate>>,
+  TError,
+  { id: number; data: PatchedMealPlanEntry },
+  TContext
+> => {
+  const mutationKey = ['mealPlanEntriesPartialUpdate'];
+  const { mutation: mutationOptions, axios: axiosOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof mealPlanEntriesPartialUpdate>>,
+    { id: number; data: PatchedMealPlanEntry }
+  > = (props) => {
+    const { id, data } = props ?? {};
+    return mealPlanEntriesPartialUpdate(id, data, axiosOptions);
+  };
+
+  return { mutationFn, mutationKey, ...mutationOptions };
+};
+
+export function useMealPlanEntriesPartialUpdate<
+  TError = AxiosError<unknown>,
+  TContext = unknown
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof mealPlanEntriesPartialUpdate>>,
+      TError,
+      { id: number; data: PatchedMealPlanEntry },
+      TContext
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof mealPlanEntriesPartialUpdate>>,
+  TError,
+  { id: number; data: PatchedMealPlanEntry },
+  TContext
+> {
+  const mutationOptions = getMealPlanEntriesPartialUpdateMutationOptions(options);
+  return useMutation(mutationOptions, queryClient);
+}
 
 export const getMealPlanEntriesDestroyMutationOptions = <TError = AxiosError<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mealPlanEntriesDestroy>>, TError,{id: number}, TContext>, axios?: AxiosRequestConfig}
