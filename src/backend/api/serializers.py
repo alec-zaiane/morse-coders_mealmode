@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from . import models
 from ingredient_store.serializers import OnHandIngredientSerializer
+from scraper.serializers import ScraperSerializer
 from typing import Any
 
 
@@ -13,6 +14,7 @@ class NutritionStatsSerializer(serializers.ModelSerializer[models.NutritionStats
 class IngredientSerializer(serializers.ModelSerializer[models.Ingredient]):
     nutrition_stats = NutritionStatsSerializer(read_only=True)
     on_hand = OnHandIngredientSerializer(read_only=True, allow_null=True)
+    scraper = ScraperSerializer(read_only=True, allow_null=True)
 
     class Meta:  # type: ignore
         model = models.Ingredient
@@ -22,6 +24,7 @@ class IngredientSerializer(serializers.ModelSerializer[models.Ingredient]):
             "nutrition_stats",
             "estimated_cost",
             "on_hand",
+            "scraper",
         )
 
 

@@ -584,6 +584,10 @@ paths:
     get:
       operationId: scrapers_list
       parameters:
+      - in: query
+        name: ingredient
+        schema:
+          type: integer
       - name: limit
         required: false
         in: query
@@ -730,6 +734,168 @@ paths:
         required: true
       tags:
       - scrapers
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/sources/:
+    get:
+      operationId: sources_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: scraper
+        schema:
+          type: integer
+      tags:
+      - sources
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSourceList'
+          description: ''
+    post:
+      operationId: sources_create
+      tags:
+      - sources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Source'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Source'
+        required: true
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+          description: ''
+  /api/sources/{id}/:
+    get:
+      operationId: sources_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this source.
+        required: true
+      tags:
+      - sources
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+          description: ''
+    put:
+      operationId: sources_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this source.
+        required: true
+      tags:
+      - sources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Source'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Source'
+        required: true
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+          description: ''
+    patch:
+      operationId: sources_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this source.
+        required: true
+      tags:
+      - sources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSource'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSource'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSource'
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+          description: ''
+    delete:
+      operationId: sources_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this source.
+        required: true
+      tags:
+      - sources
       security:
       - basicAuth: []
       - {}
@@ -954,11 +1120,17 @@ components:
           - $ref: '#/components/schemas/OnHandIngredient'
           readOnly: true
           nullable: true
+        scraper:
+          allOf:
+          - $ref: '#/components/schemas/Scraper'
+          readOnly: true
+          nullable: true
       required:
       - id
       - name
       - nutrition_stats
       - on_hand
+      - scraper
     MealPlanEntry:
       type: object
       properties:
@@ -1236,6 +1408,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Scraper'
+    PaginatedSourceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Source'
     PaginatedTagList:
       type: object
       required:
@@ -1281,6 +1476,11 @@ components:
         on_hand:
           allOf:
           - $ref: '#/components/schemas/OnHandIngredient'
+          readOnly: true
+          nullable: true
+        scraper:
+          allOf:
+          - $ref: '#/components/schemas/Scraper'
           readOnly: true
           nullable: true
     PatchedOnHandIngredient:
@@ -1398,6 +1598,40 @@ components:
           type: string
           format: date-time
           readOnly: true
+        ingredient:
+          type: integer
+          nullable: true
+    PatchedSource:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          maxLength: 100
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        cached_price:
+          type: number
+          format: double
+          nullable: true
+        quantity_unit:
+          allOf:
+          - $ref: '#/components/schemas/QuantityUnitEnum'
+          description: |-
+            The base unit for the Source stats (e.g., per kg, per liter, etc.)
+
+            * `kg` - Kilogram
+            * `L` - Liter
+            * `pc` - Piece / Count
+        quantity:
+          type: number
+          format: double
+        scraper:
+          type: integer
     PatchedTag:
       type: object
       properties:
@@ -1575,6 +1809,9 @@ components:
           type: string
           format: date-time
           readOnly: true
+        ingredient:
+          type: integer
+          nullable: true
       required:
       - cached_source
       - id

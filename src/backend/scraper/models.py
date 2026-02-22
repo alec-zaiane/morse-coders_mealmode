@@ -7,10 +7,17 @@ from api.models import IngredientUnit
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from api.models import NullableFloatField
+    from api.models import NullableFloatField, Ingredient
 
 
 class Scraper(models.Model):
+    ingredient: "models.OneToOneField[Optional[Ingredient], Optional[Ingredient]]" = models.OneToOneField(
+        "api.Ingredient",
+        on_delete=models.CASCADE,
+        related_name="scraper",
+        null=True,
+        blank=True,
+    )
     cached_source: models.ForeignKey["Optional[Source]", "Optional[Source]"] = (
         models.ForeignKey(
             "Source",
