@@ -1,4 +1,4 @@
-import { createContext, useContext, cloneElement, isValidElement, type ReactNode } from 'react';
+import { createContext, useContext, cloneElement, isValidElement, useEffect, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 interface DialogContextValue {
@@ -57,6 +57,17 @@ export function DialogContent({
   onClose?: () => void;
 }) {
   const ctx = useContext(DialogContext);
+
+  useEffect(() => {
+    if (ctx?.open) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;  
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [ctx?.open]);
+
   if (!ctx || !ctx.open) return null;
   return createPortal(
     <>

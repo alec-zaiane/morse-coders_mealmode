@@ -539,7 +539,7 @@ export function MealListPage() {
               if (!open) setReviewError(null);
             }}
           >
-            <DialogContent className="sm:w-[min(96vw,1200px)] sm:max-w-[1200px]" overlayClassName="bg-slate-500/65 backdrop-blur-[1px]">
+            <DialogContent className="sm:!max-w-[1200px] sm:!w-[96vw]" overlayClassName="bg-slate-500/65 backdrop-blur-[1px]">
               <DialogHeader>
                 <DialogTitle>Review imported recipe</DialogTitle>
               </DialogHeader>
@@ -626,8 +626,8 @@ export function MealListPage() {
                             <label className="block text-xs font-semibold text-palette-textMuted mb-1">Original text</label>
                             <Input
                               value={ingredient.source_text}
-                              onChange={(e) => updateReviewIngredient(index, { source_text: e.target.value })}
-                              placeholder="e.g. 2 cups flour"
+                              readOnly
+                              className="bg-black/5 text-palette-textMuted cursor-not-allowed border-transparent"
                             />
                           </div>
                           <div className="sm:col-span-2">
