@@ -94,7 +94,9 @@ function PlanSlot({ day, slot, planEntry, selectedMealId, onPlace, onRemove, onV
             onClick={(e) => { e.stopPropagation(); onViewMeal(planEntry.mealId); }}
           >
             <div className="font-brand font-bold text-sm text-palette-text line-clamp-2 leading-tight mb-1">{planEntry.mealName}</div>
-            <div className="text-xs font-semibold text-palette-textMuted bg-gray-100 w-fit px-1.5 py-0.5 rounded-md">{planEntry.servings} portions</div>
+            <div className="text-xs font-semibold text-palette-textMuted bg-gray-100 w-fit px-1.5 py-0.5 rounded-md">
+              {planEntry.servings} serving{planEntry.servings === 1 ? '' : 's'}
+            </div>
           </div>
         </div>
       ) : (

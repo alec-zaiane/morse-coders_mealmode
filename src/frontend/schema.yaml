@@ -2089,7 +2089,7 @@ components:
           readOnly: true
         url:
           type: string
-          maxLength: 100
+          maxLength: 500
         updated_at:
           type: string
           format: date-time
@@ -2321,7 +2321,7 @@ components:
           readOnly: true
         url:
           type: string
-          maxLength: 100
+          maxLength: 500
         updated_at:
           type: string
           format: date-time

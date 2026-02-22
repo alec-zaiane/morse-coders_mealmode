@@ -76,7 +76,7 @@ class Scraper(models.Model):
 
 
 class Source(models.Model):
-    url: models.CharField[str, str] = models.CharField(max_length=100)
+    url: models.CharField[str, str] = models.CharField(max_length=500)
     updated_at: models.DateTimeField[datetime, datetime] = models.DateTimeField(
         auto_now=True
     )

@@ -3,12 +3,16 @@ from typing import Optional
 from bs4 import BeautifulSoup
 import json
 from typing import Any
+from urllib.parse import urlparse
 
 ScrapingReturn = tuple[Optional[float], Optional[str]]
 # The above type is (price per unit, error message). Price and error are mutually exclusive
 
 
 def from_url(url: str) -> ScrapingReturn:
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        return (None, "Invalid URL format. URL must start with http:// or https://")
     if "realcanadiansuperstore" in url.split("."):
         code = url.split("/")[-1].split("?")[0]
         return from_superstore(code)
@@ -24,7 +28,10 @@ def try_schema_org_product(url: str) -> ScrapingReturn:
     }
 
     # as a fallback, see if the page contains schema.org product data that we can parse
-    response = requests.get(url, headers=headers, timeout=10)
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+    except requests.RequestException as exc:
+        return (None, f"Failed to reach the URL: {exc}")
     if response.status_code != 200:
         return (None, f"Failed to reach the URL: {response.status_code}")
     soup = BeautifulSoup(response.text, "html.parser")

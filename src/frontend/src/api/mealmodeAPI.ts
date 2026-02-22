@@ -519,7 +519,7 @@ export interface PatchedScraper {
 
 export interface PatchedSource {
   readonly id?: number;
-  /** @maxLength 100 */
+  /** @maxLength 500 */
   url?: string;
   readonly updated_at?: string;
   /** @nullable */
@@ -657,7 +657,7 @@ export const SlotEnum = {
 
 export interface Source {
   readonly id: number;
-  /** @maxLength 100 */
+  /** @maxLength 500 */
   url: string;
   readonly updated_at: string;
   /** @nullable */
