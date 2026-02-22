@@ -1,4 +1,4 @@
-import type { NutritionStats, Recipe } from '../api/mealmodeAPI';
+import type { NutritionStats, Recipe, Ingredient } from '../api/mealmodeAPI';
 
 type NonNullableFields<T> = { [K in keyof T]: NonNullable<T[K]> };
 // type NullableFields<T> = { [K in keyof T]: T[K] | undefined };
@@ -42,12 +42,20 @@ export function multiplyNutritionStats(
 
 
 export function calculateRecipeCost(recipe: Recipe): { costPerServing: number, costTotal: number, costPartiallyUnknown: boolean } {
+  function getIngredientCost(ingredient: Ingredient): number | null {
+    /// get cost per unit, return null if unknown
+    if (ingredient.scraper?.cached_price != null) {
+      return ingredient.scraper.cached_price;
+    }
+    return ingredient.estimated_cost ?? null;
+  }
+
   let total = recipe.ingredients_list.reduce((acc, ri) => {
-    const costPerUnit = ri.ingredient.estimated_cost ?? 0;
+    const costPerUnit = getIngredientCost(ri.ingredient) ?? 0;
     return acc + ri.quantity * costPerUnit;
   }, 0)
 
-  let partiallyUnknown = recipe.ingredients_list.some(ri => ri.ingredient.estimated_cost === null);
+  let partiallyUnknown = recipe.ingredients_list.some(ri => getIngredientCost(ri.ingredient) === null);
 
   return {
     costTotal: total,
