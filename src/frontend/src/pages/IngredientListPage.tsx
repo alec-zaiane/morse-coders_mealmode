@@ -11,7 +11,7 @@ export function IngredientListPage() {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [showNIngredients, setShowNIngredients] = useState(50);
-    const [onHandOnly, setOnHandOnly] = useState(false);
+    const [onHandOnly, setOnHandOnly] = useState(true);
     const [addIngredientOpen, setAddIngredientOpen] = useState(false);
     const [newIngredientName, setNewIngredientName] = useState('');
     const { data: ingredients, isLoading, error } = useIngredientsList({
@@ -142,9 +142,9 @@ export function IngredientListPage() {
                 <div className="h-px bg-palette-border flex-1" />
             </div>
             {filteredIngredients?.length === 0 && (
-              <div className="text-center py-16 text-palette-textMuted bg-white rounded-3xl border border-palette-border shadow-sm border-dashed">
-                <p className="text-lg font-medium">No ingredients found matching your search.</p>
-              </div>
+                <div className="text-center py-16 text-palette-textMuted bg-white rounded-3xl border border-palette-border shadow-sm border-dashed">
+                    <p className="text-lg font-medium">No ingredients found matching your search.</p>
+                </div>
             )}
             <ul className="space-y-4">
                 {filteredIngredients?.slice(0, showNIngredients).map(ingredient => (
