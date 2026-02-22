@@ -412,6 +412,11 @@ export interface PatchedSource {
   readonly updated_at?: string;
   /** @nullable */
   cached_price?: number | null;
+  /**
+   * @maxLength 200
+   * @nullable
+   */
+  cached_error?: string | null;
   /** The base unit for the Source stats (e.g., per kg, per liter, etc.)
 
 * `kg` - Kilogram
@@ -545,6 +550,11 @@ export interface Source {
   readonly updated_at: string;
   /** @nullable */
   cached_price?: number | null;
+  /**
+   * @maxLength 200
+   * @nullable
+   */
+  cached_error?: string | null;
   /** The base unit for the Source stats (e.g., per kg, per liter, etc.)
 
 * `kg` - Kilogram

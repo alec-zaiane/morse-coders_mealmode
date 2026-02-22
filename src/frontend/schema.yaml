@@ -1653,6 +1653,10 @@ components:
           type: number
           format: double
           nullable: true
+        cached_error:
+          type: string
+          nullable: true
+          maxLength: 200
         quantity_unit:
           allOf:
           - $ref: '#/components/schemas/QuantityUnitEnum'
@@ -1881,6 +1885,10 @@ components:
           type: number
           format: double
           nullable: true
+        cached_error:
+          type: string
+          nullable: true
+          maxLength: 200
         quantity_unit:
           allOf:
           - $ref: '#/components/schemas/QuantityUnitEnum'

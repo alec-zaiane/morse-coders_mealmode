@@ -11,12 +11,14 @@ if TYPE_CHECKING:
 
 
 class Scraper(models.Model):
-    ingredient: "models.OneToOneField[Optional[Ingredient], Optional[Ingredient]]" = models.OneToOneField(
-        "api.Ingredient",
-        on_delete=models.CASCADE,
-        related_name="scraper",
-        null=True,
-        blank=True,
+    ingredient: "models.OneToOneField[Optional[Ingredient], Optional[Ingredient]]" = (
+        models.OneToOneField(
+            "api.Ingredient",
+            on_delete=models.CASCADE,
+            related_name="scraper",
+            null=True,
+            blank=True,
+        )
     )
     cached_source: models.ForeignKey["Optional[Source]", "Optional[Source]"] = (
         models.ForeignKey(
@@ -74,6 +76,9 @@ class Source(models.Model):
         auto_now=True
     )
     cached_price: "NullableFloatField" = models.FloatField(null=True, blank=True)
+    cached_error: models.CharField[Optional[str], Optional[str]] = models.CharField(
+        max_length=200, null=True, blank=True
+    )
     quantity_unit: models.CharField[IngredientUnit, IngredientUnit] = models.CharField(
         max_length=4,
         choices=IngredientUnit.choices,
@@ -97,11 +102,18 @@ class Source(models.Model):
             return self.cached_price
 
         new_price, error = scraping.from_url(self.url)
+        now = datetime.now(timezone.utc)
         if error:
+            self.cached_error = error
+            self.cached_price = None
+            self.updated_at = now
+            Source.objects.filter(pk=self.pk).update(cached_error=error, cached_price=None, updated_at=now)
             print(f"Error scraping {self.url}: {error}")
         elif new_price is not None:
             self.cached_price = new_price / self.quantity
-            self.save()
+            self.cached_error = None
+            self.updated_at = now
+            Source.objects.filter(pk=self.pk).update(cached_price=self.cached_price, cached_error=None, updated_at=now)
         else:
             print(
                 f"Scraping {self.url} had no error and no price, this should never happen"
