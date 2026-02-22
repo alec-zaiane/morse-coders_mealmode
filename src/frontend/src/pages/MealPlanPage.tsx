@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext';
 import { useRecipesList } from '../api/mealmodeAPI';
 import type { Recipe } from '../api/mealmodeAPI';
 import { useNavigate } from 'react-router-dom';
-import { X, Plus, Search, Calendar } from 'lucide-react';
+import { X, Plus, Search, Calendar, ShoppingCart } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -161,18 +161,23 @@ function MealPlanContent() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-semibold text-palette-taupe mb-2">Meal Plan</h2>
           <p className="text-palette-slate">Click a meal, then click a slot to add it to your plan</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setViewAllSearchTerm(''); }}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              View All Meals
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate('/shopping')}>
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Generate shopping list
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setViewAllSearchTerm(''); }}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                View All Meals
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Pick a Meal for Your Plan</DialogTitle>
@@ -212,7 +217,8 @@ function MealPlanContent() {
               )}
             </div>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <Card>

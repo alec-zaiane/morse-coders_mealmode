@@ -6,8 +6,9 @@ import { MealListPage } from './pages/MealListPage';
 import { MealDetailPage } from './pages/MealDetailPage';
 import { IngredientPage } from './pages/IngredientPage';
 import { IngredientListPage } from './pages/IngredientListPage';
+import { ShoppingListPage } from './pages/ShoppingListPage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ChefHat, UtensilsCrossed, Calendar, Warehouse } from 'lucide-react';
+import { ChefHat, UtensilsCrossed, Calendar, Warehouse, ShoppingCart } from 'lucide-react';
 
 function Layout() {
   return (
@@ -55,6 +56,15 @@ function Layout() {
                 <Warehouse className="w-5 h-5" />
                 Ingredients
               </NavLink>
+              <NavLink
+                to="/shopping"
+                className={({ isActive }) =>
+                  `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${isActive ? 'bg-palette-cream/20 text-palette-terracotta' : 'text-palette-slate hover:bg-palette-cream/10 hover:text-palette-mist'}`
+                }
+              >
+                <ShoppingCart className="w-5 h-5" />
+                Shopping
+              </NavLink>
             </div>
           </div>
         </div>
@@ -80,6 +90,7 @@ export default function App() {
               <Route path="meal/:id" element={<MealDetailPage />} />
               <Route path="ingredient/:id" element={<IngredientPage />} />
               <Route path="plan" element={<MealPlanPage />} />
+              <Route path="shopping" element={<ShoppingListPage />} />
               <Route path="ingredients" element={<IngredientListPage />} />
             </Route>
           </Routes>
