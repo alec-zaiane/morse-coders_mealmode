@@ -44,15 +44,17 @@ export function DialogTrigger({
   );
 }
 
+export interface DialogContentProps {
+  className?: string;
+  children: ReactNode;
+  onClose?: () => void;
+}
+
 export function DialogContent({
   className = '',
   children,
   onClose,
-}: {
-  className?: string;
-  children: ReactNode;
-  onClose?: () => void;
-}) {
+}: DialogContentProps) {
   const ctx = useContext(DialogContext);
   if (!ctx || !ctx.open) return null;
   return (
@@ -73,8 +75,8 @@ export function DialogContent({
   );
 }
 
-export function DialogHeader({ children }: { children: ReactNode }) {
-  return <div className="mb-4">{children}</div>;
+export function DialogHeader({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`mb-4 ${className}`}>{children}</div>;
 }
 
 export function DialogTitle({ children }: { children: ReactNode }) {

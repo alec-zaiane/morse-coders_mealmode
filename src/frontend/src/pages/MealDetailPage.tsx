@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRecipesRetrieve, useRecipesPartialUpdate, useIngredientsList, getRecipesRetrieveQueryKey, getRecipesListQueryKey, useTagsList, getTagsListQueryKey, useTagsCreate, useTagsDestroy } from '../api/mealmodeAPI';
+import { useRecipesRetrieve, useRecipesPartialUpdate, useRecipesDestroy, useIngredientsList, getRecipesRetrieveQueryKey, getRecipesListQueryKey, useTagsList, getTagsListQueryKey, useTagsCreate, useTagsDestroy } from '../api/mealmodeAPI';
 import type { Recipe, RecipeIngredient, Tag, Ingredient } from '../api/mealmodeAPI';
 import { Users, DollarSign, Pencil, Plus, X, ChevronDown, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -25,6 +25,8 @@ import { calculateRecipeCost, calculateRecipeNutrition } from '../utils/calculat
 
 import { NutritionLabel } from '../components/nutritionLabel';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { useToast } from '../context/ToastContext';
+import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
 
 function ingredientUnitLabel(ing: Ingredient): string {
@@ -274,12 +276,25 @@ export function MealDetailPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [editIngredientDropdownOpen]);
 
+  const toast = useToast();
+  const [deleteRecipeConfirm, setDeleteRecipeConfirm] = useState(false);
   const updateRecipe = useRecipesPartialUpdate({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getRecipesRetrieveQueryKey(numericId) });
         queryClient.invalidateQueries({ queryKey: getRecipesListQueryKey() });
+        toast('Recipe saved');
         setEditDialogOpen(false);
+      },
+    },
+  });
+  const destroyRecipe = useRecipesDestroy({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getRecipesListQueryKey() });
+        toast('Recipe deleted');
+        setDeleteRecipeConfirm(false);
+        navigate('/', { replace: true });
       },
     },
   });
@@ -354,7 +369,22 @@ export function MealDetailPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center py-12 text-palette-slate">Loading…</div>;
+    return (
+      <div>
+        <div className="mb-6">
+          <Breadcrumbs items={[{ label: 'Meals', href: '/' }]} />
+          <div className="flex items-start justify-between gap-4 mt-2">
+            <Skeleton className="h-9 w-64" />
+            <Skeleton className="h-10 w-28" />
+          </div>
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-full max-w-md" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      </div>
+    );
   }
 
   if (isError || !recipe) {
@@ -382,10 +412,20 @@ export function MealDetailPage() {
             <h2 className="text-3xl font-semibold text-palette-taupe mb-2">{recipe.name}</h2>
           </div>
           <div className="text-right flex flex-col items-end gap-2">
-            <Button onClick={openEditDialog}>
-              <Pencil className="w-4 h-4 mr-2" />
-              Edit meal
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={openEditDialog}>
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit meal
+              </Button>
+              <Button
+                variant="outline"
+                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                onClick={() => setDeleteRecipeConfirm(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete recipe
+              </Button>
+            </div>
             {costData && (
               <div className="flex items-center gap-2 text-palette-slate text-xl">
                 <DollarSign className="w-6 h-6" />
@@ -396,31 +436,38 @@ export function MealDetailPage() {
         </div>
 
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-md flex flex-col max-h-[85vh] p-0">
+            <DialogHeader className="p-6 pb-0 shrink-0">
               <DialogTitle>Edit meal</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSaveEdit} className="space-y-4 mt-2">
-              <div>
-                <label className="block text-sm font-medium text-palette-slate mb-1">Name</label>
-                <Input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  placeholder="e.g. Greek salad"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-palette-slate mb-1">Servings</label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={editServings}
-                  onChange={(e) => setEditServings(Number(e.target.value) || 1)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-palette-slate mb-1">Ingredients</label>
+            <form onSubmit={handleSaveEdit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="overflow-y-auto px-6 py-4 space-y-6">
+                <section>
+                  <h3 className="text-sm font-semibold text-palette-taupe mb-3">Basics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-palette-slate mb-1">Name</label>
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        placeholder="e.g. Greek salad"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-palette-slate mb-1">Servings</label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={editServings}
+                        onChange={(e) => setEditServings(Number(e.target.value) || 1)}
+                      />
+                    </div>
+                  </div>
+                </section>
+                <section>
+                  <h3 className="text-sm font-semibold text-palette-taupe mb-3">Ingredients</h3>
+                  <div>
                 {editIngredients.length > 0 && (
                   <ul className="space-y-2 mb-3 p-3 border border-palette-mist rounded-md bg-palette-cream/30">
                     {editIngredients.map((sel) => (
@@ -497,9 +544,11 @@ export function MealDetailPage() {
                     </div>
                   )}
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-palette-slate mb-1">Steps</label>
+                  </div>
+                </section>
+                <section>
+                  <h3 className="text-sm font-semibold text-palette-taupe mb-3">Steps</h3>
+                  <div>
                 {editSteps.length > 0 && (
                   <ul className="space-y-2 mb-3 p-3 border border-palette-mist rounded-md bg-palette-cream/30">
                     {editSteps.map((step, index) => (
@@ -529,11 +578,13 @@ export function MealDetailPage() {
                   <Plus className="w-4 h-4 mr-2" />
                   Add step
                 </Button>
+                  </div>
+                </section>
               </div>
               {updateRecipe.isError && (
-                <p className="text-sm text-red-600">Failed to save changes. Try again.</p>
+                <p className="text-sm text-red-600 px-6">Failed to save changes. Try again.</p>
               )}
-              <div className="flex gap-2 justify-end">
+              <div className="shrink-0 flex gap-2 justify-end p-4 border-t border-palette-mist bg-white rounded-b-lg">
                 <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
                   Cancel
                 </Button>
@@ -542,6 +593,29 @@ export function MealDetailPage() {
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={deleteRecipeConfirm} onOpenChange={setDeleteRecipeConfirm}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Delete recipe?</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-palette-slate">
+              “{recipe?.name}” will be permanently removed. This can’t be undone.
+            </p>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button variant="outline" onClick={() => setDeleteRecipeConfirm(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-700 text-white"
+                disabled={destroyRecipe.isPending}
+                onClick={() => recipe && destroyRecipe.mutate({ id: recipe.id })}
+              >
+                {destroyRecipe.isPending ? 'Deleting…' : 'Delete'}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

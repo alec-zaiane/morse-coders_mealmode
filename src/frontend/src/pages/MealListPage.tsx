@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { calculateRecipeNutrition, calculateRecipeCost } from '../utils/calculations';
-import { Search, DollarSign, Flame, Plus, X, ChevronDown } from 'lucide-react';
+import { Search, DollarSign, Flame, Plus, X, ChevronDown, UtensilsCrossed } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -14,9 +14,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../components/ui/dialog';
+import { Skeleton } from '../components/ui/skeleton';
+import { Card, CardHeader, CardContent } from '../components/ui/card';
 import { useRecipesList, useTagsList, useRecipesCreate, useIngredientsList } from '../api/mealmodeAPI';
 import { getRecipesListQueryKey } from '../api/mealmodeAPI';
 import type { Tag, Ingredient } from '../api/mealmodeAPI';
+import { useToast } from '../context/ToastContext';
 
 function ingredientUnitLabel(ing: Ingredient): string {
   const u = ing.nutrition_stats?.base_unit;
@@ -27,6 +30,30 @@ function ingredientUnitLabel(ing: Ingredient): string {
 }
 
 type SelectedIngredient = { ingredientId: number; quantity: number; name: string; unit: string };
+
+function RecipeCardSkeleton() {
+  return (
+    <Card className="relative border-2 border-palette-taupe/30 overflow-hidden h-full">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-palette-cream/20 rounded-bl-full transform translate-x-12 -translate-y-12" aria-hidden />
+      <CardHeader className="relative z-10 pb-2">
+        <Skeleton className="h-6 w-3/4" />
+      </CardHeader>
+      <CardContent className="relative z-10 pt-0">
+        <div className="space-y-4">
+          <div className="flex justify-between gap-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+          <Skeleton className="h-4 w-20" />
+          <div className="flex flex-wrap gap-1">
+            <Skeleton className="h-5 w-14 rounded-full" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function MealListPage() {
   const navigate = useNavigate();
@@ -39,10 +66,12 @@ export function MealListPage() {
     ...(ingredientSearch.trim() && { search: ingredientSearch.trim() }),
   });
   const ingredientsList: Ingredient[] = ingredientsResponse?.data?.results ?? [];
+  const toast = useToast();
   const createRecipe = useRecipesCreate({
     mutation: {
       onSuccess: (response) => {
         queryClient.invalidateQueries({ queryKey: getRecipesListQueryKey() });
+        toast('Meal added');
         const res = response as { data?: { id?: number } };
         const id = res?.data?.id ?? (res as { id?: number })?.id;
         if (id != null) navigate(`/meal/${id}`);
@@ -148,43 +177,51 @@ export function MealListPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold text-palette-taupe mb-2">Meals</h2>
-          <p className="text-palette-slate">Browse and search your meal collection</p>
-        </div>
-        <Dialog open={addMealOpen} onOpenChange={setAddMealOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add meal
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
+      <div className="mb-8">
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-3">
+            <UtensilsCrossed className="h-7 w-7 text-palette-terracotta shrink-0" aria-hidden />
+            <h2 className="text-2xl font-semibold text-palette-taupe">Meals</h2>
+          </div>
+          <Dialog open={addMealOpen} onOpenChange={setAddMealOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add meal
+              </Button>
+            </DialogTrigger>
+          <DialogContent className="max-w-md flex flex-col max-h-[85vh] p-0">
+            <DialogHeader className="p-6 pb-0 shrink-0">
               <DialogTitle>Add meal</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddMeal} className="space-y-4 mt-2">
-              <div>
-                <label className="block text-sm font-medium text-palette-slate mb-1">Name</label>
-                <Input
-                  value={newMealName}
-                  onChange={(e) => setNewMealName(e.target.value)}
-                  placeholder="e.g. Greek salad"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-palette-slate mb-1">Servings</label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={newMealServings}
-                  onChange={(e) => setNewMealServings(Number(e.target.value))}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-palette-slate mb-1">Ingredients</label>
+            <form onSubmit={handleAddMeal} className="flex flex-col flex-1 min-h-0 flex overflow-hidden">
+              <div className="overflow-y-auto px-6 py-4 space-y-6">
+                <section>
+                  <h3 className="text-sm font-semibold text-palette-taupe mb-3">Basics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-palette-slate mb-1">Name</label>
+                      <Input
+                        value={newMealName}
+                        onChange={(e) => setNewMealName(e.target.value)}
+                        placeholder="e.g. Greek salad"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-palette-slate mb-1">Servings</label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={newMealServings}
+                        onChange={(e) => setNewMealServings(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                </section>
+                <section>
+                  <h3 className="text-sm font-semibold text-palette-taupe mb-3">Ingredients</h3>
+                  <div>
                 {selectedIngredients.length > 0 && (
                   <ul className="space-y-2 mb-3 p-3 border border-palette-mist rounded-md bg-palette-cream/30">
                     {selectedIngredients.map((sel) => (
@@ -261,9 +298,11 @@ export function MealListPage() {
                     </div>
                   )}
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-palette-slate mb-1">Steps</label>
+                  </div>
+                </section>
+                <section>
+                  <h3 className="text-sm font-semibold text-palette-taupe mb-3">Steps</h3>
+                  <div>
                 {newMealSteps.length > 0 && (
                   <ul className="space-y-2 mb-3 p-3 border border-palette-mist rounded-md bg-palette-cream/30">
                     {newMealSteps.map((step, index) => (
@@ -293,11 +332,13 @@ export function MealListPage() {
                   <Plus className="w-4 h-4 mr-2" />
                   Add step
                 </Button>
+                  </div>
+                </section>
               </div>
               {createRecipe.isError && (
-                <p className="text-sm text-red-600">Failed to create meal. Try again.</p>
+                <p className="text-sm text-red-600 px-6">Failed to create meal. Try again.</p>
               )}
-              <div className="flex gap-2 justify-end">
+              <div className="shrink-0 flex gap-2 justify-end p-4 border-t border-palette-mist bg-white rounded-b-lg">
                 <Button type="button" variant="outline" onClick={() => setAddMealOpen(false)}>
                   Cancel
                 </Button>
@@ -308,6 +349,8 @@ export function MealListPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
+        <p className="text-palette-slate">Browse and search your meal collection</p>
       </div>
 
       <div className="mb-6">
@@ -364,23 +407,59 @@ export function MealListPage() {
           ))}
         </div>
       </div>
+      {recipeIsError && (
+        <div className="text-center py-12 text-palette-slate">Failed to load meals. Please try again.</div>
+      )}
+      {!recipeIsError && recipeIsLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <RecipeCardSkeleton key={i} />
+          ))}
+        </div>
+      )}
       {!recipeIsError && !recipeIsLoading && filteredMeals && (
         <div>
           <div className="mb-4 text-sm text-palette-slate">
-            Showing {filteredMeals.length} of {recipeData?.data.count ?? "unknown"} meals
+            Showing {filteredMeals.length} of {recipeData?.data.count ?? 0} meals
           </div>
-          {
-            filteredMeals.length === 0 && (
-              <div className="text-center py-12 text-palette-taupe">
-                No meals found matching your criteria
-              </div>
-            )
-          }
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {
-              filteredMeals.map((recipe) => { return (<RecipeCard recipe={recipe} key={recipe.id} />) })
-            }
-          </div>
+          {filteredMeals.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              <UtensilsCrossed className="h-14 w-14 text-palette-mist mb-4" aria-hidden />
+              <p className="text-lg font-medium text-palette-taupe mb-6 max-w-sm">
+                {(recipeData?.data.count ?? 0) === 0
+                  ? 'Add your first meal to get started.'
+                  : 'No meals match your filters. Try clearing search or filters.'}
+              </p>
+              <Button
+                variant={(recipeData?.data.count ?? 0) > 0 ? 'outline' : 'default'}
+                onClick={
+                  (recipeData?.data.count ?? 0) === 0
+                    ? () => setAddMealOpen(true)
+                    : () => {
+                        setSearchTerm('');
+                        setSelectedTags([]);
+                        setMaxCost(null);
+                        setMaxCalories(null);
+                      }
+                }
+              >
+                {(recipeData?.data.count ?? 0) === 0 ? (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add your first meal
+                  </>
+                ) : (
+                  'Clear filters'
+                )}
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredMeals.map((recipe) => (
+                <RecipeCard recipe={recipe} key={recipe.id} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 

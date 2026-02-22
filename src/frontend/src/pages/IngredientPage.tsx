@@ -27,6 +27,7 @@ import { multiplyNutritionStats } from '../utils/calculations';
 import { fetchAllPages } from '../utils/api';
 import { Card } from '../components/ui/card';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { Skeleton } from '../components/ui/skeleton';
 
 function CostForm({
   ingredient,
@@ -483,7 +484,16 @@ export function IngredientPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center py-12 text-palette-slate">Loading…</div>;
+    return (
+      <div className="space-y-6">
+        <Breadcrumbs items={[{ label: 'Ingredients', href: '/ingredients' }]} />
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-48 rounded-lg" />
+          <Skeleton className="h-64 rounded-lg" />
+        </div>
+      </div>
+    );
   }
 
   if (isError || !ingredient) {
