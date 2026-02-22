@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from . import models
 from ingredient_store.serializers import OnHandIngredientSerializer
+from typing import Any
 
 
 class NutritionStatsSerializer(serializers.ModelSerializer[models.NutritionStats]):
@@ -36,11 +37,11 @@ class RecipeIngredientSerializer(serializers.ModelSerializer[models.RecipeIngred
         )
 
 
-class RecipeIngredientWriteSerializer(serializers.Serializer):
+class RecipeIngredientWriteSerializer(serializers.Serializer[models.RecipeIngredient]):
     """For create/update: list of {ingredient: id, quantity}."""
 
-    ingredient = serializers.PrimaryKeyRelatedField(
-        queryset=models.Ingredient.objects.all()
+    ingredient: serializers.PrimaryKeyRelatedField[models.Ingredient] = (  # type: ignore
+        serializers.PrimaryKeyRelatedField(queryset=models.Ingredient.objects.all())
     )
     quantity = serializers.FloatField(min_value=0)
 
@@ -57,7 +58,7 @@ class RecipeStepSerializer(serializers.ModelSerializer[models.RecipeStep]):
         fields = "__all__"
 
 
-class RecipeStepWriteSerializer(serializers.Serializer):
+class RecipeStepWriteSerializer(serializers.Serializer[models.RecipeStep]):
     """For create/update: list of {step_number, description}."""
 
     step_number = serializers.IntegerField(min_value=1)
@@ -77,7 +78,7 @@ class RecipeSerializer(serializers.ModelSerializer[models.Recipe]):
         model = models.Recipe
         fields = "__all__"
 
-    def create(self, validated_data: dict):
+    def create(self, validated_data: dict[str, Any]):
         recipe_ingredients = validated_data.pop("recipe_ingredients", [])
         recipe_steps = validated_data.pop("recipe_steps", [])
         validated_data.pop(
@@ -98,7 +99,7 @@ class RecipeSerializer(serializers.ModelSerializer[models.Recipe]):
             )
         return recipe
 
-    def update(self, instance: "models.Recipe", validated_data: dict):
+    def update(self, instance: "models.Recipe", validated_data: dict[str, Any]):
         recipe_ingredients = validated_data.pop("recipe_ingredients", None)
         recipe_steps = validated_data.pop("recipe_steps", None)
         validated_data.pop("ingredients", None)
@@ -125,8 +126,8 @@ class RecipeSerializer(serializers.ModelSerializer[models.Recipe]):
 
 
 class MealPlanEntrySerializer(serializers.ModelSerializer[models.MealPlanEntry]):
-    recipe = serializers.PrimaryKeyRelatedField(
-        queryset=models.Recipe.objects.all()
+    recipe: serializers.PrimaryKeyRelatedField[models.Recipe] = (  # type: ignore
+        serializers.PrimaryKeyRelatedField(queryset=models.Recipe.objects.all())
     )
 
     class Meta:  # type: ignore
