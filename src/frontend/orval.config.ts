@@ -5,7 +5,7 @@ export default defineConfig({
         input: './schema.yaml',
         output: {
             target: './src/api',
-            baseUrl: 'http://localhost:8000',
+            baseUrl: process.env.ORVAL_BASE_URL ?? '/',
             client: 'react-query'
         }
     },

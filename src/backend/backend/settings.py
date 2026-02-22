@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -92,6 +94,19 @@ DATABASES: dict[str, Any] = {
     }
 }
 
+# silly override but it should work for now
+if os.environ.get("USE_POSTGRES"):
+    DATABASES["default"].update(
+        {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME", "mealmode"),
+            "USER": os.environ.get("DB_USER", "mealmode"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+            "HOST": os.environ.get("DB_HOST", "db"),
+            "PORT": os.environ.get("DB_PORT", "5432"),
+        }
+    )
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -128,6 +143,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES: dict[str, Any] = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 
 # DRF
@@ -136,6 +161,9 @@ REST_FRAMEWORK: dict[str, Any] = {
     "PAGE_SIZE": 500,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+    ],
 }
 
 SPECTACULAR_SETTINGS: dict[str, Any] = {
@@ -148,4 +176,12 @@ SPECTACULAR_SETTINGS: dict[str, Any] = {
 # CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://localhost",
+    "http://localhost",
+]
+
+CORS_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "https://localhost",
+    "http://localhost",
 ]

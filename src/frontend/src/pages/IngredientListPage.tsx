@@ -19,7 +19,7 @@ export function IngredientListPage() {
     const lastFiltered = useRef<typeof filteredIngredients>([]);
     const filteredIngredients: Ingredient[] = useMemo(() => {
         if (!ingredients) return lastFiltered.current;
-        const result = ingredients.data.results.filter(ingredient => {
+        const result = ingredients.data.results?.filter(ingredient => {
             if (!ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())) { return false; }
             if (onHandOnly && ingredient.on_hand === null) { return false; }
             return true;

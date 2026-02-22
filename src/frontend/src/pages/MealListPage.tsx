@@ -73,7 +73,7 @@ export function MealListPage() {
   }, [ingredientDropdownOpen]);
 
   const filteredMeals = useMemo(() => {
-    return recipeData?.data.results.filter((recipe) => {
+    return recipeData?.data.results?.filter((recipe) => {
       if (searchTerm && !recipe.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
       if (selectedTags.length > 0 && !selectedTags.some((tag) => recipe.tags?.some((t) => t.id === tag.id))) return false;
       if (maxCost !== null) {
@@ -180,7 +180,7 @@ export function MealListPage() {
                   type="number"
                   min={1}
                   value={newMealServings}
-                  onChange={(e) => setNewMealServings(Number(e.target.value) || 4)}
+                  onChange={(e) => setNewMealServings(Number(e.target.value))}
                 />
               </div>
               <div>
@@ -196,7 +196,7 @@ export function MealListPage() {
                             min={0}
                             step="any"
                             value={sel.quantity}
-                            onChange={(e) => setIngredientQuantity(sel.ingredientId, Number(e.target.value) || 0)}
+                            onChange={(e) => setIngredientQuantity(sel.ingredientId, Number(e.target.value))}
                             className="w-20 h-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           <span className="text-palette-slate text-xs w-6">{sel.unit}</span>
@@ -352,7 +352,7 @@ export function MealListPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {tagData?.data.results.map((tag) => (
+          {tagData?.data.results?.map((tag) => (
             <Badge
               key={tag.id}
               variant={selectedTags.includes(tag) ? 'default' : 'outline'}

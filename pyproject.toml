@@ -12,5 +12,8 @@ dependencies = [
     "djangorestframework>=3.16.1",
     "djangorestframework-stubs[compatible-mpypy]>=3.16.8",
     "drf-spectacular>=0.29.0",
+    "gunicorn>=23.0.0",
+    "psycopg[binary]>=3.2.0",
     "requests>=2.32.5",
+    "whitenoise>=6.9.0",
 ]

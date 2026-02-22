@@ -1,0 +1,11 @@
+FROM ghcr.io/astral-sh/uv:alpine
+
+RUN apk add --no-cache tzdata
+WORKDIR /app/backend
+COPY pyproject.toml uv.lock* ./
+RUN uv sync --frozen
+COPY src/backend .
+RUN uv run manage.py collectstatic --noinput
+
+EXPOSE 8000
+CMD ["uv", "run", "gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]

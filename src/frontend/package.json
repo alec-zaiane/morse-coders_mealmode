@@ -8,8 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "gen-api": "cd ../backend && ../../.venv/bin/python manage.py spectacular --file ../frontend/schema.yaml && cd ../frontend && npx orval",
-    "prepare": "npm run gen-api"
+    "gen-api": "cd ../backend && uv run manage.py spectacular --file ../frontend/schema.yaml && cd ../frontend && npx orval",
+    "prepare": "npm run gen-api",
+    "prepare:dev": "ORVAL_BASE_URL=http://localhost:8000 npm run gen-api"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
@@ -24,7 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.13",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
