@@ -72,6 +72,69 @@ export const BaseUnitEnum = {
   pc: 'pc',
 } as const;
 
+export interface ConfirmRecipeErrorResponse {
+  /** Error message if confirming failed */
+  error: string;
+}
+
+export interface ConfirmRecipeResponse {
+  /** Success message confirming the recipe was saved */
+  message: string;
+}
+
+export interface ConfirmableRecipe {
+  readonly id: number;
+  readonly ingredients_list: readonly ConfirmableRecipeIngredient[];
+  readonly steps_list: readonly ConfirmableRecipeStep[];
+  /** @maxLength 100 */
+  name: string;
+  /** @maxLength 200 */
+  source_url?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  cook_time_minutes?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  prep_time_minutes?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  servings?: number | null;
+  ingredients?: number[];
+  steps?: number[];
+}
+
+export interface ConfirmableRecipeIngredient {
+  readonly id: number;
+  /** @maxLength 200 */
+  source_text: string;
+  confidence: number;
+  /** Quantity in base units (e.g., grams, liters, pieces), defined by the ingredient's nutrition stats) */
+  quantity: number;
+  confirmable_recipe: number;
+  /** @nullable */
+  best_guess_ingredient?: number | null;
+}
+
+export interface ConfirmableRecipeStep {
+  readonly id: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  step_number: number;
+  description: string;
+  confirmable_recipe: number;
+}
+
 /**
  * * `monday` - Monday
 * `tuesday` - Tuesday
@@ -119,6 +182,16 @@ export interface Ingredient {
   readonly on_hand: IngredientOnHand;
   /** @nullable */
   readonly scraper: IngredientScraper;
+}
+
+export interface LoadRecipeErrorResponse {
+  /** Error message if loading failed */
+  error: string;
+}
+
+export interface LoadRecipeRequest {
+  /** The URL of the recipe to load */
+  url: string;
 }
 
 export interface MealPlanEntry {
@@ -252,6 +325,15 @@ export interface OnHandIngredient {
   notes?: string;
 }
 
+export interface PaginatedConfirmableRecipeList {
+  count: number;
+  /** @nullable */
+  next?: string | null;
+  /** @nullable */
+  previous?: string | null;
+  results: ConfirmableRecipe[];
+}
+
 export interface PaginatedIngredientList {
   count: number;
   /** @nullable */
@@ -313,6 +395,36 @@ export interface PaginatedTagList {
   /** @nullable */
   previous?: string | null;
   results: Tag[];
+}
+
+export interface PatchedConfirmableRecipe {
+  readonly id?: number;
+  readonly ingredients_list?: readonly ConfirmableRecipeIngredient[];
+  readonly steps_list?: readonly ConfirmableRecipeStep[];
+  /** @maxLength 100 */
+  name?: string;
+  /** @maxLength 200 */
+  source_url?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  cook_time_minutes?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  prep_time_minutes?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  servings?: number | null;
+  ingredients?: number[];
+  steps?: number[];
 }
 
 /**
@@ -571,6 +683,18 @@ export interface Tag {
   name: string;
 }
 
+export type ConfirmableRecipesListParams = {
+/**
+ * Number of results to return per page.
+ */
+limit?: number;
+/**
+ * The initial index from which to return the results.
+ */
+offset?: number;
+source_url?: string;
+};
+
 export type IngredientStoreListParams = {
 /**
  * Number of results to return per page.
@@ -659,6 +783,528 @@ offset?: number;
 search?: string;
 };
 
+export const confirmableRecipesList = (
+    params?: ConfirmableRecipesListParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PaginatedConfirmableRecipeList>> => {
+    
+    
+    return axios.default.get(
+      `http://localhost:8000/api/confirmable-recipes/`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getConfirmableRecipesListQueryKey = (params?: ConfirmableRecipesListParams,) => {
+    return [
+    `http://localhost:8000/api/confirmable-recipes/`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getConfirmableRecipesListQueryOptions = <TData = Awaited<ReturnType<typeof confirmableRecipesList>>, TError = AxiosError<unknown>>(params?: ConfirmableRecipesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesList>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getConfirmableRecipesListQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof confirmableRecipesList>>> = ({ signal }) => confirmableRecipesList(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ConfirmableRecipesListQueryResult = NonNullable<Awaited<ReturnType<typeof confirmableRecipesList>>>
+export type ConfirmableRecipesListQueryError = AxiosError<unknown>
+
+
+export function useConfirmableRecipesList<TData = Awaited<ReturnType<typeof confirmableRecipesList>>, TError = AxiosError<unknown>>(
+ params: undefined |  ConfirmableRecipesListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof confirmableRecipesList>>,
+          TError,
+          Awaited<ReturnType<typeof confirmableRecipesList>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useConfirmableRecipesList<TData = Awaited<ReturnType<typeof confirmableRecipesList>>, TError = AxiosError<unknown>>(
+ params?: ConfirmableRecipesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof confirmableRecipesList>>,
+          TError,
+          Awaited<ReturnType<typeof confirmableRecipesList>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useConfirmableRecipesList<TData = Awaited<ReturnType<typeof confirmableRecipesList>>, TError = AxiosError<unknown>>(
+ params?: ConfirmableRecipesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesList>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useConfirmableRecipesList<TData = Awaited<ReturnType<typeof confirmableRecipesList>>, TError = AxiosError<unknown>>(
+ params?: ConfirmableRecipesListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesList>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getConfirmableRecipesListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+export const confirmableRecipesCreate = (
+    confirmableRecipe: NonReadonly<ConfirmableRecipe>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConfirmableRecipe>> => {
+    
+    
+    return axios.default.post(
+      `http://localhost:8000/api/confirmable-recipes/`,
+      confirmableRecipe,options
+    );
+  }
+
+
+
+export const getConfirmableRecipesCreateMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesCreate>>, TError,{data: NonReadonly<ConfirmableRecipe>}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesCreate>>, TError,{data: NonReadonly<ConfirmableRecipe>}, TContext> => {
+
+const mutationKey = ['confirmableRecipesCreate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmableRecipesCreate>>, {data: NonReadonly<ConfirmableRecipe>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  confirmableRecipesCreate(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmableRecipesCreateMutationResult = NonNullable<Awaited<ReturnType<typeof confirmableRecipesCreate>>>
+    export type ConfirmableRecipesCreateMutationBody = NonReadonly<ConfirmableRecipe>
+    export type ConfirmableRecipesCreateMutationError = AxiosError<unknown>
+
+    export const useConfirmableRecipesCreate = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesCreate>>, TError,{data: NonReadonly<ConfirmableRecipe>}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confirmableRecipesCreate>>,
+        TError,
+        {data: NonReadonly<ConfirmableRecipe>},
+        TContext
+      > => {
+
+      const mutationOptions = getConfirmableRecipesCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const confirmableRecipesRetrieve = (
+    id: number, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConfirmableRecipe>> => {
+    
+    
+    return axios.default.get(
+      `http://localhost:8000/api/confirmable-recipes/${id}/`,options
+    );
+  }
+
+
+
+
+export const getConfirmableRecipesRetrieveQueryKey = (id?: number,) => {
+    return [
+    `http://localhost:8000/api/confirmable-recipes/${id}/`
+    ] as const;
+    }
+
+    
+export const getConfirmableRecipesRetrieveQueryOptions = <TData = Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError = AxiosError<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getConfirmableRecipesRetrieveQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof confirmableRecipesRetrieve>>> = ({ signal }) => confirmableRecipesRetrieve(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ConfirmableRecipesRetrieveQueryResult = NonNullable<Awaited<ReturnType<typeof confirmableRecipesRetrieve>>>
+export type ConfirmableRecipesRetrieveQueryError = AxiosError<unknown>
+
+
+export function useConfirmableRecipesRetrieve<TData = Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof confirmableRecipesRetrieve>>,
+          TError,
+          Awaited<ReturnType<typeof confirmableRecipesRetrieve>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useConfirmableRecipesRetrieve<TData = Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof confirmableRecipesRetrieve>>,
+          TError,
+          Awaited<ReturnType<typeof confirmableRecipesRetrieve>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useConfirmableRecipesRetrieve<TData = Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useConfirmableRecipesRetrieve<TData = Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError = AxiosError<unknown>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof confirmableRecipesRetrieve>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getConfirmableRecipesRetrieveQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+export const confirmableRecipesUpdate = (
+    id: number,
+    confirmableRecipe: NonReadonly<ConfirmableRecipe>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConfirmableRecipe>> => {
+    
+    
+    return axios.default.put(
+      `http://localhost:8000/api/confirmable-recipes/${id}/`,
+      confirmableRecipe,options
+    );
+  }
+
+
+
+export const getConfirmableRecipesUpdateMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesUpdate>>, TError,{id: number;data: NonReadonly<ConfirmableRecipe>}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesUpdate>>, TError,{id: number;data: NonReadonly<ConfirmableRecipe>}, TContext> => {
+
+const mutationKey = ['confirmableRecipesUpdate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmableRecipesUpdate>>, {id: number;data: NonReadonly<ConfirmableRecipe>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  confirmableRecipesUpdate(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmableRecipesUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof confirmableRecipesUpdate>>>
+    export type ConfirmableRecipesUpdateMutationBody = NonReadonly<ConfirmableRecipe>
+    export type ConfirmableRecipesUpdateMutationError = AxiosError<unknown>
+
+    export const useConfirmableRecipesUpdate = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesUpdate>>, TError,{id: number;data: NonReadonly<ConfirmableRecipe>}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confirmableRecipesUpdate>>,
+        TError,
+        {id: number;data: NonReadonly<ConfirmableRecipe>},
+        TContext
+      > => {
+
+      const mutationOptions = getConfirmableRecipesUpdateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const confirmableRecipesPartialUpdate = (
+    id: number,
+    patchedConfirmableRecipe: NonReadonly<PatchedConfirmableRecipe>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConfirmableRecipe>> => {
+    
+    
+    return axios.default.patch(
+      `http://localhost:8000/api/confirmable-recipes/${id}/`,
+      patchedConfirmableRecipe,options
+    );
+  }
+
+
+
+export const getConfirmableRecipesPartialUpdateMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesPartialUpdate>>, TError,{id: number;data: NonReadonly<PatchedConfirmableRecipe>}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesPartialUpdate>>, TError,{id: number;data: NonReadonly<PatchedConfirmableRecipe>}, TContext> => {
+
+const mutationKey = ['confirmableRecipesPartialUpdate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmableRecipesPartialUpdate>>, {id: number;data: NonReadonly<PatchedConfirmableRecipe>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  confirmableRecipesPartialUpdate(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmableRecipesPartialUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof confirmableRecipesPartialUpdate>>>
+    export type ConfirmableRecipesPartialUpdateMutationBody = NonReadonly<PatchedConfirmableRecipe>
+    export type ConfirmableRecipesPartialUpdateMutationError = AxiosError<unknown>
+
+    export const useConfirmableRecipesPartialUpdate = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesPartialUpdate>>, TError,{id: number;data: NonReadonly<PatchedConfirmableRecipe>}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confirmableRecipesPartialUpdate>>,
+        TError,
+        {id: number;data: NonReadonly<PatchedConfirmableRecipe>},
+        TContext
+      > => {
+
+      const mutationOptions = getConfirmableRecipesPartialUpdateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const confirmableRecipesDestroy = (
+    id: number, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.default.delete(
+      `http://localhost:8000/api/confirmable-recipes/${id}/`,options
+    );
+  }
+
+
+
+export const getConfirmableRecipesDestroyMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesDestroy>>, TError,{id: number}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesDestroy>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['confirmableRecipesDestroy'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmableRecipesDestroy>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  confirmableRecipesDestroy(id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmableRecipesDestroyMutationResult = NonNullable<Awaited<ReturnType<typeof confirmableRecipesDestroy>>>
+    
+    export type ConfirmableRecipesDestroyMutationError = AxiosError<unknown>
+
+    export const useConfirmableRecipesDestroy = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesDestroy>>, TError,{id: number}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confirmableRecipesDestroy>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+
+      const mutationOptions = getConfirmableRecipesDestroyMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * Confirm the recipe, saving it as an actual Recipe and deleting the ConfirmableRecipe.
+ * @summary Confirm a ConfirmableRecipe, saving it as an actual Recipe
+ */
+export const confirmableRecipesConfirmCreate = (
+    id: number,
+    confirmableRecipe: NonReadonly<ConfirmableRecipe>, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConfirmRecipeResponse>> => {
+    
+    
+    return axios.default.post(
+      `http://localhost:8000/api/confirmable-recipes/${id}/confirm/`,
+      confirmableRecipe,options
+    );
+  }
+
+
+
+export const getConfirmableRecipesConfirmCreateMutationOptions = <TError = AxiosError<ConfirmRecipeErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesConfirmCreate>>, TError,{id: number;data: NonReadonly<ConfirmableRecipe>}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesConfirmCreate>>, TError,{id: number;data: NonReadonly<ConfirmableRecipe>}, TContext> => {
+
+const mutationKey = ['confirmableRecipesConfirmCreate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmableRecipesConfirmCreate>>, {id: number;data: NonReadonly<ConfirmableRecipe>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  confirmableRecipesConfirmCreate(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmableRecipesConfirmCreateMutationResult = NonNullable<Awaited<ReturnType<typeof confirmableRecipesConfirmCreate>>>
+    export type ConfirmableRecipesConfirmCreateMutationBody = NonReadonly<ConfirmableRecipe>
+    export type ConfirmableRecipesConfirmCreateMutationError = AxiosError<ConfirmRecipeErrorResponse>
+
+    /**
+ * @summary Confirm a ConfirmableRecipe, saving it as an actual Recipe
+ */
+export const useConfirmableRecipesConfirmCreate = <TError = AxiosError<ConfirmRecipeErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesConfirmCreate>>, TError,{id: number;data: NonReadonly<ConfirmableRecipe>}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confirmableRecipesConfirmCreate>>,
+        TError,
+        {id: number;data: NonReadonly<ConfirmableRecipe>},
+        TContext
+      > => {
+
+      const mutationOptions = getConfirmableRecipesConfirmCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * Load a recipe from a URL, returning the ConfirmableRecipe for confirmation.
+ * @summary Load a recipe from a URL, creating a ConfirmableRecipe for confirmation
+ */
+export const confirmableRecipesLoadRecipeCreate = (
+    loadRecipeRequest: LoadRecipeRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConfirmableRecipe>> => {
+    
+    
+    return axios.default.post(
+      `http://localhost:8000/api/confirmable-recipes/load-recipe/`,
+      loadRecipeRequest,options
+    );
+  }
+
+
+
+export const getConfirmableRecipesLoadRecipeCreateMutationOptions = <TError = AxiosError<LoadRecipeErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesLoadRecipeCreate>>, TError,{data: LoadRecipeRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesLoadRecipeCreate>>, TError,{data: LoadRecipeRequest}, TContext> => {
+
+const mutationKey = ['confirmableRecipesLoadRecipeCreate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmableRecipesLoadRecipeCreate>>, {data: LoadRecipeRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  confirmableRecipesLoadRecipeCreate(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmableRecipesLoadRecipeCreateMutationResult = NonNullable<Awaited<ReturnType<typeof confirmableRecipesLoadRecipeCreate>>>
+    export type ConfirmableRecipesLoadRecipeCreateMutationBody = LoadRecipeRequest
+    export type ConfirmableRecipesLoadRecipeCreateMutationError = AxiosError<LoadRecipeErrorResponse>
+
+    /**
+ * @summary Load a recipe from a URL, creating a ConfirmableRecipe for confirmation
+ */
+export const useConfirmableRecipesLoadRecipeCreate = <TError = AxiosError<LoadRecipeErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmableRecipesLoadRecipeCreate>>, TError,{data: LoadRecipeRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof confirmableRecipesLoadRecipeCreate>>,
+        TError,
+        {data: LoadRecipeRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getConfirmableRecipesLoadRecipeCreateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
 export const ingredientStoreList = (
     params?: IngredientStoreListParams, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<PaginatedOnHandIngredientList>> => {

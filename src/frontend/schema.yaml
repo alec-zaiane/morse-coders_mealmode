@@ -3,6 +3,246 @@ info:
   title: Mealmode API
   version: 1.0.0
 paths:
+  /api/confirmable-recipes/:
+    get:
+      operationId: confirmable_recipes_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: source_url
+        schema:
+          type: string
+      tags:
+      - confirmable-recipes
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConfirmableRecipeList'
+          description: ''
+    post:
+      operationId: confirmable_recipes_create
+      tags:
+      - confirmable-recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+        required: true
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmableRecipe'
+          description: ''
+  /api/confirmable-recipes/{id}/:
+    get:
+      operationId: confirmable_recipes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this confirmable recipe.
+        required: true
+      tags:
+      - confirmable-recipes
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmableRecipe'
+          description: ''
+    put:
+      operationId: confirmable_recipes_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this confirmable recipe.
+        required: true
+      tags:
+      - confirmable-recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+        required: true
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmableRecipe'
+          description: ''
+    patch:
+      operationId: confirmable_recipes_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this confirmable recipe.
+        required: true
+      tags:
+      - confirmable-recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedConfirmableRecipe'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedConfirmableRecipe'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedConfirmableRecipe'
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmableRecipe'
+          description: ''
+    delete:
+      operationId: confirmable_recipes_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this confirmable recipe.
+        required: true
+      tags:
+      - confirmable-recipes
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/confirmable-recipes/{id}/confirm/:
+    post:
+      operationId: confirmable_recipes_confirm_create
+      description: Confirm the recipe, saving it as an actual Recipe and deleting
+        the ConfirmableRecipe.
+      summary: Confirm a ConfirmableRecipe, saving it as an actual Recipe
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this confirmable recipe.
+        required: true
+      tags:
+      - confirmable-recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConfirmableRecipe'
+        required: true
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmRecipeResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmRecipeErrorResponse'
+          description: ''
+  /api/confirmable-recipes/load-recipe/:
+    post:
+      operationId: confirmable_recipes_load_recipe_create
+      description: Load a recipe from a URL, returning the ConfirmableRecipe for confirmation.
+      summary: Load a recipe from a URL, creating a ConfirmableRecipe for confirmation
+      tags:
+      - confirmable-recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoadRecipeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoadRecipeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoadRecipeRequest'
+        required: true
+      security:
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmableRecipe'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoadRecipeErrorResponse'
+          description: ''
   /api/ingredient-store/:
     get:
       operationId: ingredient_store_list
@@ -1113,6 +1353,123 @@ components:
         * `kg` - Kilogram
         * `L` - Liter
         * `pc` - Piece / Count
+    ConfirmRecipeErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message if confirming failed
+      required:
+      - error
+    ConfirmRecipeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message confirming the recipe was saved
+      required:
+      - message
+    ConfirmableRecipe:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ingredients_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfirmableRecipeIngredient'
+          readOnly: true
+        steps_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfirmableRecipeStep'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        source_url:
+          type: string
+          maxLength: 200
+        cook_time_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        prep_time_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        servings:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        ingredients:
+          type: array
+          items:
+            type: integer
+        steps:
+          type: array
+          items:
+            type: integer
+      required:
+      - id
+      - ingredients_list
+      - name
+      - steps_list
+    ConfirmableRecipeIngredient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        source_text:
+          type: string
+          maxLength: 200
+        confidence:
+          type: number
+          format: double
+        quantity:
+          type: number
+          format: double
+          description: Quantity in base units (e.g., grams, liters, pieces), defined
+            by the ingredient's nutrition stats)
+        confirmable_recipe:
+          type: integer
+        best_guess_ingredient:
+          type: integer
+          nullable: true
+      required:
+      - confidence
+      - confirmable_recipe
+      - id
+      - quantity
+      - source_text
+    ConfirmableRecipeStep:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        step_number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        description:
+          type: string
+        confirmable_recipe:
+          type: integer
+      required:
+      - confirmable_recipe
+      - description
+      - id
+      - step_number
     DayEnum:
       enum:
       - monday
@@ -1166,6 +1523,23 @@ components:
       - nutrition_stats
       - on_hand
       - scraper
+    LoadRecipeErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message if loading failed
+      required:
+      - error
+    LoadRecipeRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: The URL of the recipe to load
+      required:
+      - url
     MealPlanEntry:
       type: object
       properties:
@@ -1328,6 +1702,29 @@ components:
       required:
       - id
       - ingredient
+    PaginatedConfirmableRecipeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfirmableRecipe'
     PaginatedIngredientList:
       type: object
       required:
@@ -1489,6 +1886,54 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Tag'
+    PatchedConfirmableRecipe:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ingredients_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfirmableRecipeIngredient'
+          readOnly: true
+        steps_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfirmableRecipeStep'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        source_url:
+          type: string
+          maxLength: 200
+        cook_time_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        prep_time_minutes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        servings:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        ingredients:
+          type: array
+          items:
+            type: integer
+        steps:
+          type: array
+          items:
+            type: integer
     PatchedIngredient:
       type: object
       properties:
