@@ -122,7 +122,8 @@ export function IngredientListPage() {
                 </div>
                 <Button
                     onClick={() => setOnHandOnly(v => !v)}
-                    className={`w-full sm:w-auto rounded-2xl h-12 px-6 font-bold transition-all shadow-none flex-shrink-0 ${onHandOnly ? "bg-palette-primary text-white hover:bg-palette-primaryDark hover:shadow-md border border-transparent" : "bg-white border-2 border-palette-border text-palette-text hover:border-palette-primary hover:text-palette-primary hover:bg-palette-primary/5"}`}
+                    variant={onHandOnly ? "default" : "outline"}
+                    className={`w-full sm:w-auto rounded-2xl h-12 px-6 font-bold transition-all flex-shrink-0 ${onHandOnly ? "shadow-md" : "shadow-none"}`}
                 >
                     <Refrigerator size={18} className="mr-2" />
                     In Stock Only

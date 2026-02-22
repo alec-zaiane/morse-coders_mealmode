@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useMealPlanEntriesList,
@@ -54,17 +54,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const mealPlan: MealPlanEntry[] = useMemo(() => {
+  const mealPlanFromServer: MealPlanEntry[] = useMemo(() => {
     const results = listResponse?.data?.results;
     if (!Array.isArray(results)) return [];
     return results.map(apiEntryToContext);
   }, [listResponse]);
+  const [mealPlan, setMealPlan] = useState<MealPlanEntry[]>([]);
+
+  useEffect(() => {
+    setMealPlan(mealPlanFromServer);
+  }, [mealPlanFromServer]);
 
   const value = useMemo<AppContextValue>(
     () => ({
       mealPlan,
       isLoading,
       addMealToPlan: (entry) => {
+        const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        setMealPlan((prev) => {
+          const withoutSlot = prev.filter((item) => !(item.day === entry.day && item.slot === entry.slot));
+          return [...withoutSlot, { id: tempId, ...entry }];
+        });
         createEntry.mutate({
           data: {
             recipe: Number(entry.mealId),
@@ -72,14 +82,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
             slot: entry.slot as SlotEnum,
             servings: entry.servings,
           },
+        }, {
+          onError: () => {
+            queryClient.invalidateQueries({ queryKey: getMealPlanEntriesListQueryKey() });
+          },
         });
       },
       removeMealFromPlan: (entryId) => {
+        setMealPlan((prev) => prev.filter((item) => item.id !== entryId));
+        if (entryId.startsWith('temp-')) return;
         const id = Number(entryId);
         if (!Number.isNaN(id)) destroyEntry.mutate({ id });
       },
     }),
-    [mealPlan, isLoading, createEntry, destroyEntry]
+    [mealPlan, isLoading, createEntry, destroyEntry, queryClient]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
