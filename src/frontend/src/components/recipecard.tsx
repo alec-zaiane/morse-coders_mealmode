@@ -36,8 +36,18 @@ export function RecipeCard({ recipe, compact = false }: { recipe: Recipe; compac
             onClick={() => navigate(`/meal/${recipe.id}`)}
         >
             {/* "Cover Image" Gradient Area */}
-            <div className={`w-full ${coverColor} ${compact ? 'h-20 p-3' : 'h-40 p-4'} flex flex-col justify-between`}>
-                <div className="flex justify-end gap-2">
+            <div
+                className={`relative w-full ${recipe.image_url ? '' : coverColor} ${compact ? 'h-20 p-3' : 'h-40 p-4'} flex flex-col justify-between`}
+            >
+                {recipe.image_url && (
+                    <img
+                        src={recipe.image_url}
+                        alt=""
+                        referrerPolicy="no-referrer"
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                )}
+                <div className="relative z-10 flex justify-end gap-2">
                     {/* Cost Badge */}
                     <div className="bg-white/95 backdrop-blur-sm rounded-xl px-2.5 py-1.5 flex items-center gap-1 shadow-sm">
                         <DollarSign className="w-3.5 h-3.5 text-palette-amber" />
@@ -54,7 +64,7 @@ export function RecipeCard({ recipe, compact = false }: { recipe: Recipe; compac
                     </div>
                 </div>
             </div>
-            
+
             <CardHeader className={compact ? 'pt-3 pb-1 px-4' : 'pt-5 pb-2 px-5'}>
                 <CardTitle className={`${compact ? 'text-lg' : 'text-xl'} font-brand font-bold text-palette-text leading-tight line-clamp-2`}>
                     {recipe.name}
@@ -73,7 +83,7 @@ export function RecipeCard({ recipe, compact = false }: { recipe: Recipe; compac
                         </span>
                     ) : null}
                 </div>
-                
+
                 <div className={`${compact ? 'pt-1' : 'mt-auto pt-3'} flex flex-wrap gap-1.5`}>
                     {recipe.tags.slice(0, 3).map((tag) => (
                         <Badge key={tag.id} variant="secondary" className="text-[10px] px-2.5 py-0.5 bg-palette-background text-palette-textMuted border border-palette-border font-semibold hover:bg-gray-100 transition-colors">

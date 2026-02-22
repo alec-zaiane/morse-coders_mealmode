@@ -200,6 +200,11 @@ class Recipe(models.Model):
     notes: models.TextField[Optional[str], Optional[str]] = models.TextField(
         blank=True, help_text=_("Optional notes about the recipe")
     )
+    image_url: models.URLField[Optional[str], Optional[str]] = models.URLField(
+        blank=True,
+        help_text=_("Optional URL to an image of the dish"),
+        max_length=512,
+    )
 
     if TYPE_CHECKING:
         from django_stubs_ext.db.models.manager import RelatedManager

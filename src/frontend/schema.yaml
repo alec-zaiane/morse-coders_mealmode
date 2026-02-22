@@ -2461,6 +2461,11 @@ components:
         notes:
           type: string
           description: Optional notes about the recipe
+        image_url:
+          type: string
+          format: uri
+          description: Optional URL to an image of the dish
+          maxLength: 200
         ingredients:
           type: array
           items:
@@ -2605,6 +2610,11 @@ components:
         notes:
           type: string
           description: Optional notes about the recipe
+        image_url:
+          type: string
+          format: uri
+          description: Optional URL to an image of the dish
+          maxLength: 200
         ingredients:
           type: array
           items:
