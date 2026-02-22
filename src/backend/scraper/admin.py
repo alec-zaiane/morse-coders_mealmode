@@ -23,5 +23,22 @@ class ConfirmableRecipeAdmin(admin.ModelAdmin[models.ConfirmableRecipe]):
     search_fields = ("name", "source_url")
 
 
-admin.site.register(models.Source)
-admin.site.register(models.Scraper)
+@admin.register(models.Source)
+class SourceAdmin(admin.ModelAdmin[models.Source]):
+    list_display = (
+        "id",
+        "url",
+        "scraper",
+        "updated_at",
+        "cached_price",
+        "cached_error",
+        "quantity",
+        "quantity_unit",
+    )
+    search_fields = ("url",)
+
+
+@admin.register(models.Scraper)
+class ScraperAdmin(admin.ModelAdmin[models.Scraper]):
+    list_display = ("id", "ingredient", "cached_price", "cached_source", "updated_at")
+    search_fields = ("ingredient__name",)

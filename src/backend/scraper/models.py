@@ -71,6 +71,9 @@ class Scraper(models.Model):
         self.cached_price = min_price
         return min_price
 
+    def __str__(self) -> str:
+        return f"Scraper for {self.ingredient.name if self.ingredient else 'No Ingredient'}"
+
 
 class Source(models.Model):
     url: models.CharField[str, str] = models.CharField(max_length=500)
@@ -125,6 +128,14 @@ class Source(models.Model):
                 f"Scraping {self.url} had no error and no price, this should never happen"
             )
         return self.cached_price
+
+    def __str__(self) -> str:
+        detail = (
+            f"${self.cached_price:.2f}/{self.quantity_unit}"
+            if self.cached_price
+            else self.cached_error or "No price"
+        )
+        return f"Source for {self.scraper.ingredient.name if self.scraper and self.scraper.ingredient else 'No Ingredient'} [{detail}] ({self.url})"
 
 
 # ConfirmableRecipe stuff is for recipes that need to be confirmed by the user before being added to the actual Recipe model
