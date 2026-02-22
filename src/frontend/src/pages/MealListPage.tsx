@@ -425,15 +425,10 @@ export function MealListPage() {
           {filteredMeals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
               <UtensilsCrossed className="h-14 w-14 text-palette-mist mb-4" aria-hidden />
-              <p className="text-lg font-medium text-palette-taupe mb-1">
-                {(recipeData?.data.count ?? 0) === 0
-                  ? 'No meals yet'
-                  : 'No meals match your filters'}
-              </p>
-              <p className="text-palette-slate text-sm mb-6 max-w-sm">
+              <p className="text-lg font-medium text-palette-taupe mb-6 max-w-sm">
                 {(recipeData?.data.count ?? 0) === 0
                   ? 'Add your first meal to get started.'
-                  : 'Try clearing search or filters.'}
+                  : 'No meals match your filters. Try clearing search or filters.'}
               </p>
               <Button
                 variant={(recipeData?.data.count ?? 0) > 0 ? 'outline' : 'default'}

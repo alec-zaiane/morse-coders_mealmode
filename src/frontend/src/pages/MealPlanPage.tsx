@@ -136,18 +136,25 @@ function MealPlanContent() {
     const recipe = recipes.find((r) => String(r.id) === selectedMealId);
     if (recipe) {
       addMealToPlan({ mealId: selectedMealId, day, slot, servings: recipe.servings ?? 1 });
-      toast('Plan updated');
+      toast('Added to plan');
     }
     setSelectedMealId(null);
   };
 
   const handleRemoveRequest = (entry: { id: string; mealName: string }) => setConfirmRemove(entry);
   const handleConfirmRemove = () => {
-    if (confirmRemove) {
-      removeMealFromPlan(confirmRemove.id);
-      toast('Removed from plan');
-      setConfirmRemove(null);
-    }
+    if (!confirmRemove) return;
+    const fullEntry = enrichedPlan.find((e) => e.id === confirmRemove.id);
+    const entryToRestore = fullEntry
+      ? { mealId: fullEntry.mealId, day: fullEntry.day, slot: fullEntry.slot, servings: fullEntry.servings }
+      : null;
+    removeMealFromPlan(confirmRemove.id);
+    toast('Removed from plan', {
+      undo: entryToRestore
+        ? () => addMealToPlan(entryToRestore)
+        : undefined,
+    });
+    setConfirmRemove(null);
   };
   const handleViewMeal = (mealId: string) => navigate(`/meal/${mealId}`);
 
@@ -167,7 +174,13 @@ function MealPlanContent() {
           <p className="text-palette-slate">Click a meal, then click a slot to add it to your plan</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate('/shopping')}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              toast('Shopping list ready');
+              navigate('/shopping');
+            }}
+          >
             <ShoppingCart className="w-4 h-4 mr-2" />
             Generate shopping list
           </Button>
@@ -247,14 +260,16 @@ function MealPlanContent() {
             {mealPlan.length === 0 && (
               <div className="flex flex-col items-center justify-center py-10 px-4 mb-4 rounded-lg bg-palette-cream/20 border border-palette-mist">
                 <Calendar className="h-12 w-12 text-palette-mist mb-3" aria-hidden />
-                <p className="text-lg font-medium text-palette-taupe mb-1">No meals on your plan yet</p>
-                <p className="text-palette-slate text-sm mb-4 text-center">Pick a meal from the list, then click a slot to add it.</p>
+                <p className="text-lg font-medium text-palette-taupe mb-1">Plan your first week</p>
+                <p className="text-palette-slate text-sm mb-4 text-center">Add meals to each slot, then generate your shopping list.</p>
                 <Button onClick={() => setIsDialogOpen(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   View All Meals
                 </Button>
               </div>
             )}
+            {/* Desktop: wide table */}
+            <div className="hidden lg:block overflow-x-auto">
             <div className="min-w-[800px]">
               <div className="grid grid-cols-8 gap-2 mb-2">
                 <div className="font-semibold text-sm text-palette-slate" />
@@ -289,6 +304,57 @@ function MealPlanContent() {
                 </div>
               ))}
             </div>
+            </div>
+            {mealPlan.length > 0 && (
+              <div className="lg:hidden space-y-4 mt-4">
+                {DAYS.map((day) => (
+                  <div key={day} className="border border-palette-mist rounded-lg p-3 bg-white">
+                    <div className="font-semibold text-palette-taupe capitalize mb-2">{day}</div>
+                    {SLOTS.map((slot) => {
+                      const planEntry = enrichedPlan.find((e) => e.day === day && e.slot === slot);
+                      return (
+                        <div
+                          key={slot}
+                          className="flex items-center justify-between gap-2 py-2 border-t border-palette-mist/50 first:border-t-0"
+                        >
+                          <span className="text-sm text-palette-slate capitalize shrink-0 w-20">{slot}</span>
+                          {planEntry ? (
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <button
+                                type="button"
+                                onClick={() => handleViewMeal(planEntry.mealId)}
+                                className="font-medium text-palette-taupe text-sm truncate text-left hover:underline"
+                              >
+                                {planEntry.mealName}
+                              </button>
+                              <span className="text-xs text-palette-slate shrink-0">{planEntry.servings} servings</span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveRequest({ id: planEntry.id, mealName: planEntry.mealName })}
+                                className="shrink-0 p-1 rounded text-red-600 hover:bg-red-50"
+                                aria-label="Remove from plan"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : selectedMealId ? (
+                            <button
+                              type="button"
+                              onClick={() => handlePlace(day, slot)}
+                              className="text-sm text-palette-terracotta font-medium hover:underline"
+                            >
+                              Tap to add meal
+                            </button>
+                          ) : (
+                            <span className="text-palette-slate text-sm">—</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           )}
         </CardContent>

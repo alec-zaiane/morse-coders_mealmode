@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRecipesRetrieve, useRecipesPartialUpdate, useIngredientsList, getRecipesRetrieveQueryKey, getRecipesListQueryKey, useTagsList, getTagsListQueryKey, useTagsCreate, useTagsDestroy } from '../api/mealmodeAPI';
+import { useRecipesRetrieve, useRecipesPartialUpdate, useRecipesDestroy, useIngredientsList, getRecipesRetrieveQueryKey, getRecipesListQueryKey, useTagsList, getTagsListQueryKey, useTagsCreate, useTagsDestroy } from '../api/mealmodeAPI';
 import type { Recipe, RecipeIngredient, Tag, Ingredient } from '../api/mealmodeAPI';
 import { Users, DollarSign, Pencil, Plus, X, ChevronDown, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -277,13 +277,24 @@ export function MealDetailPage() {
   }, [editIngredientDropdownOpen]);
 
   const toast = useToast();
+  const [deleteRecipeConfirm, setDeleteRecipeConfirm] = useState(false);
   const updateRecipe = useRecipesPartialUpdate({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getRecipesRetrieveQueryKey(numericId) });
         queryClient.invalidateQueries({ queryKey: getRecipesListQueryKey() });
-        toast('Meal updated');
+        toast('Recipe saved');
         setEditDialogOpen(false);
+      },
+    },
+  });
+  const destroyRecipe = useRecipesDestroy({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getRecipesListQueryKey() });
+        toast('Recipe deleted');
+        setDeleteRecipeConfirm(false);
+        navigate('/', { replace: true });
       },
     },
   });
@@ -401,10 +412,20 @@ export function MealDetailPage() {
             <h2 className="text-3xl font-semibold text-palette-taupe mb-2">{recipe.name}</h2>
           </div>
           <div className="text-right flex flex-col items-end gap-2">
-            <Button onClick={openEditDialog}>
-              <Pencil className="w-4 h-4 mr-2" />
-              Edit meal
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={openEditDialog}>
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit meal
+              </Button>
+              <Button
+                variant="outline"
+                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                onClick={() => setDeleteRecipeConfirm(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete recipe
+              </Button>
+            </div>
             {costData && (
               <div className="flex items-center gap-2 text-palette-slate text-xl">
                 <DollarSign className="w-6 h-6" />
@@ -572,6 +593,29 @@ export function MealDetailPage() {
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={deleteRecipeConfirm} onOpenChange={setDeleteRecipeConfirm}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Delete recipe?</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-palette-slate">
+              “{recipe?.name}” will be permanently removed. This can’t be undone.
+            </p>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button variant="outline" onClick={() => setDeleteRecipeConfirm(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-700 text-white"
+                disabled={destroyRecipe.isPending}
+                onClick={() => recipe && destroyRecipe.mutate({ id: recipe.id })}
+              >
+                {destroyRecipe.isPending ? 'Deleting…' : 'Delete'}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
