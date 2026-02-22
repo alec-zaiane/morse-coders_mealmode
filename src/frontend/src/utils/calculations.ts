@@ -49,12 +49,12 @@ function getIngredientCost(ingredient: Ingredient): number | null {
 
 export function calculateRecipeCost(recipe: Recipe): { costPerServing: number, costTotal: number, costPartiallyUnknown: boolean } {
 
-  let total = recipe.ingredients_list.reduce((acc, ri) => {
+  const total = recipe.ingredients_list.reduce((acc, ri) => {
     const costPerUnit = getIngredientCost(ri.ingredient) ?? 0;
     return acc + ri.quantity * costPerUnit;
   }, 0)
 
-  let partiallyUnknown = recipe.ingredients_list.some(ri => getIngredientCost(ri.ingredient) === null);
+  const partiallyUnknown = recipe.ingredients_list.some(ri => getIngredientCost(ri.ingredient) === null);
 
   return {
     costTotal: total,
@@ -67,7 +67,7 @@ export function calculateRecipeCost(recipe: Recipe): { costPerServing: number, c
 export function calculateRecipeNutrition(
   recipe: Recipe,
 ): { nutritionPerServing: NutritionStatsAggregated, nutritionTotal: NutritionStatsAggregated } {
-  let total = recipe.ingredients_list.map(ri => multiplyNutritionStats(ri.ingredient.nutrition_stats, ri.quantity)
+  const total = recipe.ingredients_list.map(ri => multiplyNutritionStats(ri.ingredient.nutrition_stats, ri.quantity)
   ).reduce((acc, nutritionStats) => addNutritionStats(acc, nutritionStats ?? {}), {} as NutritionStatsAggregated)
 
   return {

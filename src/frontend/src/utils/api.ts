@@ -1,6 +1,6 @@
 import * as axios from 'axios';
 
-export async function fetchAllPages<T>(initial: axios.AxiosResponse<any, { results: T[]; next: string | null }>): Promise<T[]> {
+export async function fetchAllPages<T>(initial: axios.AxiosResponse<{ results: T[]; next?: string | null }>): Promise<T[]> {
     const results: T[] = [];
 
     results.push(...initial.data.results);

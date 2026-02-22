@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useIngredientsList, useIngredientsCreate, getIngredientsListQueryKey, type Ingredient } from "../api/mealmodeAPI";
 import { Input } from "../components/ui/input";
@@ -30,16 +30,13 @@ export function IngredientListPage() {
     });
 
 
-    const lastFiltered = useRef<typeof filteredIngredients>([]);
     const filteredIngredients: Ingredient[] = useMemo(() => {
-        if (!ingredients) return lastFiltered.current;
-        const result = ingredients.data.results?.filter(ingredient => {
+        if (!ingredients?.data?.results) return [];
+        return ingredients.data.results.filter(ingredient => {
             if (!ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())) { return false; }
             if (onHandOnly && ingredient.on_hand === null) { return false; }
             return true;
         });
-        lastFiltered.current = result;
-        return result;
     }, [ingredients, searchTerm, onHandOnly]);
 
     if (error || !ingredients && !isLoading) {
@@ -56,11 +53,11 @@ export function IngredientListPage() {
     return (<div className="space-y-6 md:space-y-8 animate-fadeIn">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 className="font-brand text-2xl md:text-3xl font-semibold text-palette-taupe mb-2 flex items-center gap-2 tracking-tight">
+                <h1 className="font-brand text-2xl md:text-3xl font-semibold text-black mb-2 flex items-center gap-2 tracking-tight">
                     <Warehouse className="h-7 w-7 text-palette-terracotta" aria-hidden />
                     Pantry & Cost Intelligence
                 </h1>
-                <p className="text-palette-textMuted text-sm font-medium">Track your ingredients, costs, and nutritional baselines.</p>
+                <p className="text-black text-sm font-medium">Track your ingredients, costs, and nutritional baselines.</p>
             </div>
             <Dialog open={addIngredientOpen} onOpenChange={setAddIngredientOpen}>
                 <DialogTrigger asChild>
@@ -121,7 +118,7 @@ export function IngredientListPage() {
                             min={1}
                             value={showNIngredients}
                             onChange={e => setShowNIngredients(Number(e.target.value))}
-                            className="h-8 py-1 px-2 border-transparent bg-transparent outline-none shadow-none text-center font-bold focus-visible:ring-0 text-palette-primary"
+                            className="no-number-spinner h-8 py-1 px-2 border-transparent bg-transparent outline-none shadow-none text-center font-bold tabular-nums focus-visible:ring-0 text-palette-primary"
                         />
                     </div>
                 </div>

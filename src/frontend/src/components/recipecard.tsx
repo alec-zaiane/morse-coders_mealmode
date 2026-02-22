@@ -7,20 +7,20 @@ import { calculateRecipeCost, calculateRecipeNutrition } from "../utils/calculat
 
 // Helper to generate a deterministic flat color based on a string
 function getFlatColorFromName(name: string) {
-  const colors = [
-    "bg-rose-300",
-    "bg-sky-300",
-    "bg-amber-300",
-    "bg-emerald-300",
-    "bg-indigo-300",
-    "bg-orange-300",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
+    const colors = [
+        "bg-gradient-to-br from-rose-400 to-rose-300",
+        "bg-gradient-to-br from-sky-400 to-sky-300",
+        "bg-gradient-to-br from-amber-400 to-amber-300",
+        "bg-gradient-to-br from-emerald-400 to-emerald-300",
+        "bg-gradient-to-br from-indigo-400 to-indigo-300",
+        "bg-gradient-to-br from-orange-400 to-orange-300",
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
 }
 
 export function RecipeCard({ recipe, compact = false }: { recipe: Recipe; compact?: boolean }) {
@@ -32,7 +32,7 @@ export function RecipeCard({ recipe, compact = false }: { recipe: Recipe; compac
     return (
         <Card
             key={recipe.id}
-            className={`flex flex-col overflow-hidden border border-palette-border bg-white shadow-soft cursor-pointer rounded-2xl ${compact ? '' : 'h-full'}`}
+            className={`flex flex-col overflow-hidden border border-palette-border bg-white shadow-soft cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 rounded-2xl ${compact ? '' : 'h-full'}`}
             onClick={() => navigate(`/meal/${recipe.id}`)}
         >
             {/* "Cover Image" Gradient Area */}

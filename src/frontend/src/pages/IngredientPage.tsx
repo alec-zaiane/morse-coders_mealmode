@@ -576,7 +576,7 @@ export function IngredientPage() {
           { label: ingredient.name },
         ]}
       />
-      <h2 className="font-brand text-2xl md:text-3xl font-semibold text-palette-taupe mb-2 flex items-center gap-2 tracking-tight">
+      <h2 className="font-brand text-2xl md:text-3xl font-semibold text-black mb-2 flex items-center gap-2 tracking-tight">
         <Refrigerator className="h-7 w-7 text-palette-terracotta" aria-hidden />
         {ingredient.name}
       </h2>

@@ -6,13 +6,14 @@ import { MealDetailPage } from './pages/MealDetailPage';
 import { IngredientPage } from './pages/IngredientPage';
 import { IngredientListPage } from './pages/IngredientListPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
+import { ReviewImportedRecipePage } from './pages/ReviewImportedRecipePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChefHat, UtensilsCrossed, Calendar, Warehouse, ShoppingCart } from 'lucide-react';
 
 function Layout() {
   return (
     <div className="min-h-screen bg-palette-background font-sans text-palette-text">
-      <nav className="sticky top-0 z-50 bg-palette-background/95 backdrop-blur-sm transition-all duration-300">
+      <nav className="!fixed !top-0 !left-0 !right-0 z-[100] w-full bg-palette-background/95 backdrop-blur-sm transition-all duration-300">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex min-h-20 flex-col items-center justify-center gap-3 py-4">
             <NavLink
@@ -69,7 +70,7 @@ function Layout() {
           </div>
         </div>
       </nav>
-      <main className="mx-auto max-w-7xl px-4 py-6 pb-24 sm:px-6 sm:py-8 sm:pb-8 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 pb-24 pt-28 sm:px-6 sm:pb-8 sm:pt-40 lg:px-8">
         <Outlet />
       </main>
 
@@ -141,6 +142,7 @@ export default function App() {
               <Route path="plan" element={<MealPlanPage />} />
               <Route path="ingredients" element={<IngredientListPage />} />
               <Route path="shopping" element={<ShoppingListPage />} />
+              <Route path="import/review" element={<ReviewImportedRecipePage />} />
             </Route>
           </Routes>
         </AppProvider>

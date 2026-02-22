@@ -21,6 +21,10 @@ export default {
           text: '#2F2A26',
           textMuted: '#797067',
           border: '#E6E1DA',
+          taupe: '#6A5E53',
+          mist: '#DFE2DF',
+          slate: '#7F8E89',
+          terracotta: '#D15B40',
         },
       },
       boxShadow: {

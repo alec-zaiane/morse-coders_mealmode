@@ -160,11 +160,11 @@ function MealPlanContent() {
     <div className="space-y-6 sm:space-y-8 animate-fadeIn">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="font-brand text-2xl md:text-3xl font-semibold text-palette-taupe mb-2 flex items-center gap-2 tracking-tight">
+          <h2 className="font-brand text-2xl md:text-3xl font-semibold text-black mb-2 flex items-center gap-2 tracking-tight">
             <CalendarDays className="h-7 w-7 text-palette-terracotta" aria-hidden />
             Weekly Planner
           </h2>
-          <p className="text-palette-textMuted text-sm font-medium">Select a meal from below, then tap a slot to schedule it.</p>
+          <p className="text-black text-sm font-medium">Select a meal from below, then tap a slot to schedule it.</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setViewAllSearchTerm(''); }}>
           <DialogTrigger asChild>

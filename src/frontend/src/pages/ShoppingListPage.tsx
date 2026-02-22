@@ -108,11 +108,11 @@ function ShoppingListContent() {
     <div className="space-y-6 md:space-y-8 animate-fadeIn">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="font-brand text-2xl md:text-3xl font-semibold text-palette-taupe mb-2 flex items-center gap-2 tracking-tight">
+          <h1 className="font-brand text-2xl md:text-3xl font-semibold text-black mb-2 flex items-center gap-2 tracking-tight">
             <ShoppingCart className="h-7 w-7 text-palette-terracotta" aria-hidden />
             Shopping List
           </h1>
-          <p className="text-palette-slate">
+          <p className="text-black">
             {isEmpty
               ? 'Add meals to your meal plan, then generate your list.'
               : 'What to buy for your planned meals. On-hand quantities have been subtracted.'}
@@ -123,7 +123,7 @@ function ShoppingListContent() {
             <Button 
               onClick={checkoutStatus === 'idle' ? handleInstacartCheckout : undefined} 
               disabled={checkoutStatus === 'loading'} 
-              className={`w-full sm:w-auto flex items-center gap-2 border-0 transition-colors ${
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 border-0 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg ${
                 checkoutStatus === 'success' 
                   ? 'bg-green-600 hover:bg-green-700 text-white' 
                   : 'bg-[#0aad0a] hover:bg-[#088c08] text-white'
@@ -133,7 +133,7 @@ function ShoppingListContent() {
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white" />
               )}
               {checkoutStatus === 'idle' && <ShoppingCart className="w-4 h-4" />}
-              {checkoutStatus === 'success' && <CheckCircle2 className="w-4 h-4" />}
+              {checkoutStatus === 'success' && <CheckCircle2 className="w-4 h-4 animate-fadeIn" />}
               
               {checkoutStatus === 'loading' ? 'Transferring Items...' 
                 : checkoutStatus === 'success' ? 'Sent to Instacart!' 

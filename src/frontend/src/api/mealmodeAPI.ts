@@ -65,7 +65,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
 export type BaseUnitEnum = typeof BaseUnitEnum[keyof typeof BaseUnitEnum];
 
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const BaseUnitEnum = {
   kg: 'kg',
   L: 'L',
@@ -149,7 +149,7 @@ export interface ConfirmableRecipeStep {
 export type DayEnum = typeof DayEnum[keyof typeof DayEnum];
 
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const DayEnum = {
   monday: 'monday',
   tuesday: 'tuesday',
@@ -596,7 +596,7 @@ export interface PatchedTag {
 export type QuantityUnitEnum = typeof QuantityUnitEnum[keyof typeof QuantityUnitEnum];
 
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const QuantityUnitEnum = {
   kg: 'kg',
   L: 'L',
@@ -690,7 +690,7 @@ export interface Scraper {
 export type SlotEnum = typeof SlotEnum[keyof typeof SlotEnum];
 
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const SlotEnum = {
   breakfast: 'breakfast',
   lunch: 'lunch',
