@@ -1,104 +1,181 @@
 # MealMode
 
-Plan your week's meals, set servings per slot, and get one shopping list scaled to your plan and pantry.
+MealMode is a weekly meal planning app that turns recipes into a serving-aware shopping list after subtracting pantry inventory.
 
-## Features
+## Problem
 
-- **Meals** — Add and manage recipes with ingredients, steps, tags, prep/cook time, and optional notes. View cost and nutrition per serving.
-- **Weekly plan** — Fill breakfast, lunch, and dinner (and snack) slots for each day. Edit servings per slot for families and meal prep.
-- **Shopping list** — Generate a single list from your plan: ingredients are scaled by \(\frac{\text{plan servings}}{\text{recipe servings}}\) and on-hand quantities are subtracted.
-- **Pantry** — Track ingredients and “on hand” quantities so the shopping list only shows what you need to buy.
-- **Filters** — Filter meals by tags, max cost per serving, and max calories. Import and review recipes from external sources.
+Meal planning tools often miss practical kitchen workflows:
+- Recipe servings rarely match planned servings for each meal slot.
+- Shopping lists usually do not account for what is already on hand.
+- Planning, pantry tracking, and grocery prep are split across different tools.
 
-## Tech stack
+## Solution
 
-| Layer    | Stack |
-|----------|--------|
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router, Lucide icons |
-| Backend  | Django 6, Django REST Framework, drf-spectacular (OpenAPI), PostgreSQL (production) |
-| API      | REST; frontend client generated with Orval from OpenAPI schema |
+MealMode combines recipes, a weekly planner, pantry tracking, and list generation in one flow:
+- Plan meals across breakfast, lunch, dinner, and snacks.
+- Adjust servings per slot (not just per recipe).
+- Auto-calculate a consolidated shopping list by scaling ingredient quantities and subtracting pantry amounts.
 
-## Project structure
+## Key Features
 
-```
+- Recipe management: ingredients, steps, prep/cook time, tags, nutrition, and estimated cost.
+- Weekly planning grid: assign recipes by day and meal slot.
+- Serving-aware scaling: ingredient quantities are scaled by `planned_servings / recipe_servings`.
+- Pantry-aware shopping list: on-hand inventory is deducted from required totals.
+- Smart filtering: find meals by tags, max calories, and max cost.
+- Recipe import + review flow: load external recipes and confirm before saving.
+
+## Tech Stack
+
+| Layer | Stack |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router |
+| Backend | Django 6, Django REST Framework, django-filter, drf-spectacular |
+| Data | PostgreSQL (Docker/prod), SQLite (local dev default) |
+| API Tooling | OpenAPI + Orval-generated React Query client |
+| Deployment | Docker Compose, Caddy (frontend + reverse proxy), Gunicorn |
+
+## Architecture (High-Level)
+
+- `frontend` (Vite build served by Caddy) calls `/api/*`.
+- `caddy` reverse-proxies API/admin/static requests to `backend`.
+- `backend` (Django + Gunicorn) serves REST endpoints and admin.
+- `db` (Postgres) stores recipes, plan entries, pantry state, and generated list inputs.
+
+## Project Structure
+
+```text
 mealmode/
-├── pyproject.toml          # Python/uv project (backend deps)
+├── compose.yml
+├── docker/
+│   ├── dockerfile.backend
+│   ├── dockerfile.frontend
+│   └── Caddyfile
 ├── src/
-│   ├── backend/            # Django app (api, migrations, manage.py)
-│   └── frontend/           # React app (Vite, src/components, pages, api)
+│   ├── backend/
+│   └── frontend/
+├── pyproject.toml
 └── README.md
 ```
 
-## Setup
+## Local Development Setup (Without Docker)
 
 ### Prerequisites
 
-- **Python 3.13+** and [uv](https://docs.astral.sh/uv/) (or pip)
-- **Node.js 18+** and npm
+- Python 3.13+
+- [uv](https://docs.astral.sh/uv/) (recommended) or pip
+- Node.js 18+ and npm
 
 ### Backend
 
-1. From the repo root, install and run the backend:
+```bash
+uv sync
+uv run python src/backend/manage.py migrate
+uv run python src/backend/manage.py runserver
+```
 
-   ```bash
-   uv sync
-   uv run python src/backend/manage.py migrate
-   uv run python src/backend/manage.py runserver
-   ```
-
-   The API will be at **http://localhost:8000**. Optional: create a superuser with `uv run python src/backend/manage.py createsuperuser`.
-
-2. For a fresh DB, use SQLite (default). For PostgreSQL, set `DATABASE_URL` and use the `psycopg` dependency already in `pyproject.toml`.
+Backend runs at `http://localhost:8000`.
 
 ### Frontend
 
-1. Install and start the dev server:
+```bash
+cd src/frontend
+npm install
+npm run dev
+```
 
-   ```bash
-   cd src/frontend
-   npm install
-   npm run dev
-   ```
+Frontend runs at `http://localhost:5173`.
 
-   The app will be at **http://localhost:5173** and will talk to the backend at `http://localhost:8000`.
+### Regenerate API Client (after backend schema changes)
 
-2. **Regenerate API client** (after backend schema changes):
+```bash
+cd src/frontend
+npm run gen-api
+```
 
-   ```bash
-   npm run gen-api
-   ```
+## Docker Setup (Reproducible with One Command)
 
-   This runs the backend’s `spectacular` schema export and then Orval to generate `src/api/mealmodeAPI.ts`.
+### Prerequisites
 
-## Scripts
+- Docker Desktop (or Docker Engine + Compose v2)
 
-| Command | Where | Description |
-|--------|--------|-------------|
-| `uv run python src/backend/manage.py runserver` | root | Run Django dev server (port 8000) |
-| `npm run dev` | src/frontend | Run Vite dev server (port 5173) |
-| `npm run build` | src/frontend | TypeScript check + production build |
-| `npm run gen-api` | src/frontend | Export OpenAPI schema and generate API client |
+### 1) Configure environment
 
-## About the project
+```bash
+cp .env.example .env
+```
 
-### What inspired me
+Optional: edit `.env` values (at minimum, change passwords outside hackathon/demo use).
 
-I wanted an app that actually matched how I cook: a small set of recipes, a weekly plan, and one list for the shop—without re-typing ingredients or doing mental math when cooking for more people. Existing tools were either too heavy or didn’t handle “this recipe is for 4, but I’m planning it for 2” in a simple way. So I built **MealMode** to focus on that: plan the week, set servings per slot (great for families and meal prep), and get a single shopping list that scales to your plan and subtracts what you already have.
+### 2) Build and run everything
 
-### How I built it
+```bash
+docker compose up --build
+```
 
-- **Frontend:** React (Vite), TypeScript, Tailwind CSS, and TanStack Query for server state. The UI is built around a weekly grid (breakfast / lunch / dinner), recipe cards with cost and nutrition per serving, and a shopping list that updates when the plan or servings change.
-- **Backend:** Django REST Framework with models for recipes, ingredients, tags, meal-plan entries (day, slot, servings), and an ingredient store for “on hand” quantities. The shopping list is computed by scaling recipe ingredients by \(\frac{\text{plan servings}}{\text{recipe servings}}\) and then subtracting on-hand amounts.
-- **Flow:** Users add or pick recipes, fill the weekly plan, optionally edit servings per slot, then generate the list. Filters (tags, max cost, max calories) and an “on hand” pantry keep the list relevant.
+That single command will:
+- Build backend and frontend images.
+- Start Postgres.
+- Wait for DB health.
+- Run Django migrations automatically on backend startup.
+- Serve the web app through Caddy.
 
-### What I learned
+### 3) Access the app
 
-- **Scaling and aggregation:** Making the shopping list correct for multiple recipes and different serving sizes—and merging the same ingredient across meals—required clear scaling logic and consistent units (e.g. kg, L, pc).
-- **API design:** Exposing meal-plan entries with PATCH for servings (so the plan and list stay in sync) and keeping the frontend simple with a small set of endpoints.
-- **UX details:** Editable servings in the plan grid, “Filter by tags” with an “All” default, and a visible “X servings” so the plan and list never feel disconnected.
+- App: `http://localhost:8080` by default (or your `APP_HTTP_PORT` value)
+- Django admin (proxied): `http://localhost:8080/admin` by default
+- API (proxied): `http://localhost:8080/api` by default
 
-### Challenges I faced
+### Useful Docker commands
 
-- **Shopping list vs plan mismatch:** The list was initially computed as if every planned meal were 1 serving. Fixing it meant passing each plan entry’s servings into the aggregation and using the scale factor above so the list matches what you actually planned.
-- **Keeping the plan and list in sync:** Letting users edit servings in the plan (for families or meal prep) meant adding PATCH support on the backend and wiring it through the app context so the list recomputes as soon as the plan changes.
-- **Scope:** Balancing “enough features to be useful” (filters, nutrition, cost, on-hand) with “simple enough to build and maintain” led to a focused feature set: meals, plan, and list first.
+```bash
+# Start in detached mode
+docker compose up --build -d
+
+# Stop services
+docker compose down
+
+# Stop services and remove volumes (resets DB)
+docker compose down -v
+
+# Follow logs
+docker compose logs -f
+
+# Create admin user
+docker compose exec backend uv run python manage.py createsuperuser
+```
+
+### Environment variables used by Docker
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `APP_HTTP_PORT` | Host port mapped to Caddy HTTP | `8080` |
+| `APP_HTTPS_PORT` | Host port mapped to Caddy HTTPS | `8443` |
+| `POSTGRES_DB` | Postgres database name | `mealmode` |
+| `POSTGRES_USER` | Postgres username | `mealmode` |
+| `POSTGRES_PASSWORD` | Postgres password | `change-me` |
+| `USE_POSTGRES` | Enables Postgres settings in Django | `true` |
+| `DB_HOST` | Django DB host | `db` |
+| `DB_PORT` | Django DB port | `5432` |
+| `DB_NAME` | Django DB name | `mealmode` |
+| `DB_USER` | Django DB user | `mealmode` |
+| `DB_PASSWORD` | Django DB password | `change-me` |
+| `GUNICORN_WORKERS` | Gunicorn worker count | `4` |
+
+## Hackathon Demo Flow (Suggested)
+
+1. Open app and show empty/initial state.
+2. Add or import 2-3 recipes with different base servings.
+3. Build a weekly plan across multiple meal slots.
+4. Change servings per slot (example: dinner from 2 to 5 servings).
+5. Add pantry inventory for a few shared ingredients.
+6. Generate shopping list and highlight:
+   - scaled ingredient totals,
+   - cross-recipe consolidation,
+   - pantry subtraction.
+7. Apply filters (tag/calories/cost) and show how plans update quickly.
+8. End on final shopping list as the practical output.
+
+## Why This Matters
+
+MealMode reduces planning friction and grocery waste by keeping recipe scaling, pantry inventory, and shopping output in sync.

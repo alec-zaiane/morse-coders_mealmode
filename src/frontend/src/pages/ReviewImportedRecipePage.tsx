@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Plus, X } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { IngredientSearchSelect } from '../components/IngredientSearchSelect';
@@ -342,8 +342,8 @@ export function ReviewImportedRecipePage() {
             </Button>
           </div>
           <div className="relative">
-            <div className="pointer-events-none absolute left-0 right-1 top-0 z-10 h-4 rounded-t-xl bg-gradient-to-b from-white/85 to-transparent backdrop-blur-[1px]" />
-            <div className="pointer-events-none absolute bottom-0 left-0 right-1 z-10 h-4 rounded-b-xl bg-gradient-to-t from-white/85 to-transparent backdrop-blur-[1px]" />
+            <div className="pointer-events-none absolute left-0 right-1 top-0 z-10 h-3 rounded-t-xl bg-gradient-to-b from-white to-transparent" />
+            <div className="pointer-events-none absolute bottom-0 left-0 right-1 z-10 h-3 rounded-b-xl bg-gradient-to-t from-white to-transparent" />
             <div className="max-h-[38dvh] space-y-2 overflow-y-auto overflow-x-hidden pr-1">
               {reviewDraft.ingredients_list.map((ingredient, index) => (
                 <div
@@ -427,9 +427,11 @@ export function ReviewImportedRecipePage() {
                       type="button"
                       variant="ghost"
                       onClick={() => removeReviewIngredient(index)}
-                      className="h-10 w-10 border-palette-border bg-white p-0 text-palette-textMuted hover:bg-palette-background hover:text-palette-text"
+                      className="flex h-10 w-10 items-center justify-center border border-red-200 bg-red-50 !p-0 text-red-500 hover:border-red-400 hover:bg-red-100 hover:text-red-700"
+                      aria-label={`Delete ingredient ${index + 1}`}
+                      title="Delete ingredient"
                     >
-                      <X className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -447,8 +449,8 @@ export function ReviewImportedRecipePage() {
             </Button>
           </div>
           <div className="relative">
-            <div className="pointer-events-none absolute left-0 right-1 top-0 z-10 h-4 rounded-t-xl bg-gradient-to-b from-white/85 to-transparent backdrop-blur-[1px]" />
-            <div className="pointer-events-none absolute bottom-0 left-0 right-1 z-10 h-4 rounded-b-xl bg-gradient-to-t from-white/85 to-transparent backdrop-blur-[1px]" />
+            <div className="pointer-events-none absolute left-0 right-1 top-0 z-10 h-3 rounded-t-xl bg-gradient-to-b from-white to-transparent" />
+            <div className="pointer-events-none absolute bottom-0 left-0 right-1 z-10 h-3 rounded-b-xl bg-gradient-to-t from-white to-transparent" />
             <div className="max-h-[34dvh] space-y-2 overflow-y-auto overflow-x-hidden pr-1">
               {reviewDraft.steps_list.map((step, index) => (
                 <div
@@ -467,10 +469,11 @@ export function ReviewImportedRecipePage() {
                     type="button"
                     variant="ghost"
                     onClick={() => removeReviewStep(index)}
-                    className="mt-1 h-10 w-10 shrink-0 p-0"
+                    className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center border border-red-200 bg-red-50 !p-0 text-red-500 hover:border-red-400 hover:bg-red-100 hover:text-red-700"
                     aria-label={`Remove step ${index + 1}`}
+                    title="Delete step"
                   >
-                    <X className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ))}

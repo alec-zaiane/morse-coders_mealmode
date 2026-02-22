@@ -3,11 +3,16 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: mealmode
-      POSTGRES_USER: mealmode
-      POSTGRES_PASSWORD: INSECURE_PASSWORD
+      POSTGRES_DB: ${POSTGRES_DB:-mealmode}
+      POSTGRES_USER: ${POSTGRES_USER:-mealmode}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mealmode} -d ${POSTGRES_DB:-mealmode}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -16,14 +21,19 @@ services:
     restart: unless-stopped
     expose:
       - "8000"
+    command: >
+      sh -c "uv run python manage.py migrate &&
+      uv run gunicorn backend.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-4}"
     environment:
-      USE_POSTGRES: "true"
-      DB_HOST: db
-      DB_NAME: mealmode
-      DB_USER: mealmode
-      DB_PASSWORD: INSECURE_PASSWORD
+      USE_POSTGRES: ${USE_POSTGRES:-true}
+      DB_HOST: ${DB_HOST:-db}
+      DB_NAME: ${DB_NAME:-mealmode}
+      DB_USER: ${DB_USER:-mealmode}
+      DB_PASSWORD: ${DB_PASSWORD:-change-me}
+      DB_PORT: ${DB_PORT:-5432}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     build:
@@ -31,8 +41,8 @@ services:
       dockerfile: docker/dockerfile.frontend
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "${APP_HTTP_PORT:-8080}:80"
+      - "${APP_HTTPS_PORT:-8443}:443"
     volumes:
       - caddy_data:/data
       - caddy_config:/config

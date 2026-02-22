@@ -40,8 +40,8 @@ function ingredientUnitLabel(ing: Ingredient): string {
 type SelectedIngredient = { ingredientId: number; quantity: number; name: string; unit: string };
 
 export function MealListPage() {
-  const MAX_COST_SLIDER_LIMIT = 100;
-  const MAX_CALORIES_SLIDER_LIMIT = 5000;
+  const MAX_COST_SLIDER_LIMIT = 30;
+  const MAX_CALORIES_SLIDER_LIMIT = 2000;
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
